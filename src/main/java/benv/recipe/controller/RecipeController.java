@@ -17,10 +17,17 @@ public class RecipeController {
         this.recipeService = recipeService;
     }
 
-    @PostMapping
+    @PutMapping
     public ResponseEntity<RecipeModel> createRecipe(@RequestBody RecipeModel recipe) {
         RecipeModel created = recipeService.createRecipe(recipe);
         return ResponseEntity.ok(created);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<RecipeModel> updateRecipe(@PathVariable Long id,
+                                                    @RequestBody RecipeModel recipe) {
+        RecipeModel updated = recipeService.updateRecipe(id, recipe);
+        return ResponseEntity.ok(updated);
     }
 
     @GetMapping
