@@ -21,7 +21,7 @@ public class RecipeService {
     }
     
     public List<RecipeModel> getAllRecipes() {
-        return new ArrayList<>(recipes);
+        return recipes;
     }
     
     public RecipeModel getRecipeById(Long id) {
