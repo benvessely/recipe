@@ -94,7 +94,7 @@ public class RecipeModel {
     }
 
     public void setCreatedAt(LocalDateTime createdAt) {
-        System.out.println(String.format("Setting createdAt to %s", createdAt));
+        System.out.printf("Setting createdAt to %s%n", createdAt);
         this.createdAt = createdAt;
     }
 
@@ -106,7 +106,6 @@ public class RecipeModel {
         this.updatedAt = updatedAt;
     }
 
-    // Optional: Add a toString() method for debugging
     @Override
     public String toString() {
         return "RecipeModel{" +

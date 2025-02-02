@@ -3,6 +3,10 @@ package benv.recipe.service;
 import benv.recipe.model.RecipeModel;
 import org.springframework.stereotype.Service;
 
+import benv.recipe.repository.RecipeRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,36 +14,26 @@ import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 public class RecipeService {
-    private final List<RecipeModel> recipes = new ArrayList<>();
-    private final AtomicLong idCounter = new AtomicLong();
-    
+    private final RecipeRepository recipeRepository;
+
+    @Autowired
+    public RecipeService(RecipeRepository recipeRepository) {
+        this.recipeRepository = recipeRepository;
+    }
+
     public RecipeModel createRecipe(RecipeModel recipe) {
-        recipe.setId(idCounter.incrementAndGet());
-        recipe.setCreatedAt(LocalDateTime.now());
-        recipes.add(recipe);
-        return recipe;
+        return recipeRepository.createRecipe(recipe);
     }
-    
+
     public List<RecipeModel> getAllRecipes() {
-        return recipes;
+        return recipeRepository.getAllRecipes();
     }
-    
+
     public RecipeModel getRecipeById(Long id) {
-        return recipes.stream()
-            .filter(recipe -> recipe.getId().equals(id))
-            .findFirst()
-            .orElseThrow(() -> new RuntimeException("Recipe not found"));
+        return recipeRepository.getRecipeById(id);
     }
 
-    public RecipeModel updateRecipe (Long id, RecipeModel updatedRecipe) {
-        RecipeModel existingRecipe = getRecipeById(id);
-        int recipeIndex = recipes.indexOf(existingRecipe);
-
-        updatedRecipe.setId(id);
-        updatedRecipe.setCreatedAt(existingRecipe.getCreatedAt());
-        updatedRecipe.setUpdatedAt(LocalDateTime.now());
-
-        recipes.set(recipeIndex, updatedRecipe);
-        return updatedRecipe;
+    public RecipeModel updateRecipe(Long id, RecipeModel recipe) {
+        return recipeRepository.updateRecipe(id, recipe);
     }
 }
