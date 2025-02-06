@@ -97,8 +97,8 @@ public class RecipeRepository {
 
     public RecipeModel updateRecipe(Long id, RecipeModel recipe) {
         String sql = """
-            UPDATE recipes 
-            SET title = ?, description = ?, ingredients = ?, 
+            UPDATE recipes
+            SET title = ?, description = ?, ingredients = ?,
                 instructions = ?, servings = ?, prep_time_minutes = ?,
                 cook_time_minutes = ?, updated_at = CURRENT_TIMESTAMP
             WHERE id = ?
