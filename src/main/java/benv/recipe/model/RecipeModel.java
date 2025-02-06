@@ -3,7 +3,7 @@ package benv.recipe.model;
 import java.time.LocalDateTime;
 
 public class RecipeModel {
-    private Long id;
+    private Integer id;
     private String title;
     private String description;
     private String ingredients;
@@ -25,11 +25,11 @@ public class RecipeModel {
     }
 
     // Getters and Setters for all fields
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

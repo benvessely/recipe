@@ -29,11 +29,11 @@ public class RecipeService {
         return recipeRepository.getAllRecipes();
     }
 
-    public RecipeModel getRecipeById(Long id) {
+    public RecipeModel getRecipeById(Integer id) {
         return recipeRepository.getRecipeById(id);
     }
 
-    public RecipeModel updateRecipe(Long id, RecipeModel recipe) {
+    public RecipeModel updateRecipe(Integer id, RecipeModel recipe) {
         return recipeRepository.updateRecipe(id, recipe);
     }
 }

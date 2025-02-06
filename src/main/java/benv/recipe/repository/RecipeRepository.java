@@ -23,7 +23,7 @@ public class RecipeRepository {
         @Override
         public RecipeModel mapRow(ResultSet rs, int rowNum) throws SQLException {
             RecipeModel recipe = new RecipeModel();
-            recipe.setId(rs.getLong("id"));
+            recipe.setId(rs.getInt("id"));
             recipe.setTitle(rs.getString("title"));
             recipe.setDescription(rs.getString("description"));
             recipe.setIngredients(rs.getString("ingredients"));
@@ -70,7 +70,7 @@ public class RecipeRepository {
             return ps;
         }, keyHolder);
 
-        recipe.setId(keyHolder.getKey().longValue());
+        recipe.setId((Integer) keyHolder.getKey());
         return getRecipeById(recipe.getId());
     }
 
@@ -81,7 +81,7 @@ public class RecipeRepository {
         );
     }
 
-    public RecipeModel getRecipeById(Long id) {
+    public RecipeModel getRecipeById(Integer id) {
         List<RecipeModel> results = jdbcTemplate.query(
                 "SELECT * FROM recipes WHERE id = ?",
                 recipeRowMapper,
@@ -95,7 +95,7 @@ public class RecipeRepository {
         return results.get(0);
     }
 
-    public RecipeModel updateRecipe(Long id, RecipeModel recipe) {
+    public RecipeModel updateRecipe(Integer id, RecipeModel recipe) {
         String sql = """
             UPDATE recipes
             SET title = ?, description = ?, ingredients = ?,

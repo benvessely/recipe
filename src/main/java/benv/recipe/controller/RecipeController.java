@@ -17,14 +17,16 @@ public class RecipeController {
         this.recipeService = recipeService;
     }
 
+    // Spring automatically converts JSON from request into RecipeModel object
     @PutMapping
     public ResponseEntity<RecipeModel> createRecipe(@RequestBody RecipeModel recipe) {
         RecipeModel created = recipeService.createRecipe(recipe);
         return ResponseEntity.ok(created);
     }
 
+    // Spring automatically converts JSON from request into RecipeModel object
     @PutMapping("/{id}")
-    public ResponseEntity<RecipeModel> updateRecipe(@PathVariable Long id,
+    public ResponseEntity<RecipeModel> updateRecipe(@PathVariable Integer id,
                                                     @RequestBody RecipeModel recipe) {
         RecipeModel updated = recipeService.updateRecipe(id, recipe);
         return ResponseEntity.ok(updated);
@@ -36,7 +38,7 @@ public class RecipeController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<RecipeModel> getRecipe(@PathVariable Long id) {
+    public ResponseEntity<RecipeModel> getRecipe(@PathVariable Integer id) {
         return ResponseEntity.ok(recipeService.getRecipeById(id));
     }
 }
