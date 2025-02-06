@@ -52,6 +52,7 @@ public class RecipeRepository {
             INSERT INTO recipes (title, description, ingredients, instructions, 
                                servings, prep_time_minutes, cook_time_minutes)
             VALUES (?, ?, ?, ?, ?, ?, ?)
+            RETURNING id
             """;
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
