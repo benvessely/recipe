@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import java.sql.SQLException;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;
@@ -17,23 +18,28 @@ import java.util.List;
 public class RecipeRepository {
     private final JdbcTemplate jdbcTemplate;
 
-    private final RowMapper<RecipeModel> recipeRowMapper = (rs, rowNum) -> {
-        RecipeModel recipe = new RecipeModel();
-        recipe.setId(rs.getLong("id"));
-        recipe.setTitle(rs.getString("title"));
-        recipe.setDescription(rs.getString("description"));
-        recipe.setIngredients(rs.getString("ingredients"));
-        recipe.setInstructions(rs.getString("instructions"));
-        recipe.setServings(rs.getInt("servings"));
-        recipe.setPrepTimeMinutes(rs.getInt("prep_time_minutes"));
-        recipe.setCookTimeMinutes(rs.getInt("cook_time_minutes"));
-        recipe.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
-        Timestamp updatedAt = rs.getTimestamp("updated_at");
-        if (updatedAt != null) {
-            recipe.setUpdatedAt(updatedAt.toLocalDateTime());
+    private static class RecipeRowMapper implements RowMapper<RecipeModel> {
+        @Override
+        public RecipeModel mapRow(ResultSet rs, int rowNum) throws SQLException {
+            RecipeModel recipe = new RecipeModel();
+            recipe.setId(rs.getLong("id"));
+            recipe.setTitle(rs.getString("title"));
+            recipe.setDescription(rs.getString("description"));
+            recipe.setIngredients(rs.getString("ingredients"));
+            recipe.setInstructions(rs.getString("instructions"));
+            recipe.setServings(rs.getInt("servings"));
+            recipe.setPrepTimeMinutes(rs.getInt("prep_time_minutes"));
+            recipe.setCookTimeMinutes(rs.getInt("cook_time_minutes"));
+            recipe.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+            Timestamp updatedAt = rs.getTimestamp("updated_at");
+            if (updatedAt != null) {
+                recipe.setUpdatedAt(updatedAt.toLocalDateTime());
+            }
+            return recipe;
         }
-        return recipe;
     };
+
+    private final RowMapper<RecipeModel> recipeRowMapper = new RecipeRowMapper();
 
     @Autowired
     public RecipeRepository(JdbcTemplate jdbcTemplate) {
