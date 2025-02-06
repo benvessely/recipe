@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.SQLException;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.List;
