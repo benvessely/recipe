@@ -10,3 +10,17 @@ CREATE TABLE IF NOT EXISTS recipes (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS ingredients (
+    id SERIAL PRIMARY KEY,
+    usda_id DECIMAL UNIQUE NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    category_id DECIMAL,
+    base_unit VARCHAR(50) DEFAULT 'g',
+    calories_per_100g DECIMAL,
+    protein_per_100g DECIMAL,
+    fat_per_100g DECIMAL,
+    carbs_per_100g DECIMAL,
+    fiber_per_100g DECIMAL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
