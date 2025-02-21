@@ -13,9 +13,9 @@ CREATE TABLE IF NOT EXISTS recipes (
 
 CREATE TABLE IF NOT EXISTS ingredients (
     id SERIAL PRIMARY KEY,
-    usda_id DECIMAL UNIQUE NOT NULL,
+    fdc_id INTEGER UNIQUE NOT NULL,
     name VARCHAR(255) NOT NULL,
-    category_id DECIMAL,
+    category_id INTEGER,
     base_unit VARCHAR(50) DEFAULT 'g',
     calories_per_100g DECIMAL,
     protein_per_100g DECIMAL,

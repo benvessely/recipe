@@ -1,5 +1,6 @@
 package benv.recipe.service;
 
+import benv.recipe.model.RecipeModel;
 import com.opencsv.exceptions.CsvValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.core.io.ClassPathResource;
 
@@ -48,17 +51,23 @@ public class DataLoaderService {
     public void loadFoodData() {
         try (CSVReader reader = new CSVReader(new InputStreamReader(
                 new ClassPathResource("nutrition_data/food.csv").getInputStream()))) {
+
             String[] headers = reader.readNext();
             System.out.println(Arrays.toString(headers)); //DB
 
             String[] row;
-            int i=0; //DB
-            while ((row = reader.readNext()) != null && i <= 10) {
-                System.out.println(Arrays.toString(row)); //DB
-                i++;
+            int rowNum = 0;
+            while ((row = reader.readNext()) != null) {
+                System.out.printf("rowNum = %d, row is %s%n", rowNum, Arrays.toString(row)); //DB
                 int fdcId = Integer.parseInt(row[0]);
-                String description = row[2];
-                int category_id = Integer.parseInt(row[3]);
+                String name = row[2];
+                int categoryId = Integer.parseInt(row[3]);
+
+                String sql = """
+                    INSERT INTO ingredients (fdc_id, name, category_id)
+                    VALUES (?, ?, ?)
+                    """;
+                jdbcTemplate.update(sql, fdcId, name, categoryId);
             }
         } catch (IOException e) {
             logger.error("Could not read CSV file", e);
