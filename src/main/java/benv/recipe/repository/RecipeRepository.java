@@ -1,19 +1,19 @@
 package benv.recipe.repository;
 
 import benv.recipe.model.RecipeModel;
+import io.micrometer.common.lang.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import java.sql.SQLException;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.sql.Timestamp;
+import java.sql.*;
+
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public class RecipeRepository {
@@ -57,7 +57,11 @@ public class RecipeRepository {
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        jdbcTemplate.update(connection -> {
+        // Lambda implements createPreparedStatement method of the
+        // PreparedStatementCreator interface, which results in an object
+        // with reference type PreparedStatementCreator but really anonymous
+        // type being passed into update.
+        jdbcTemplate.update( (Connection connection) -> {
             PreparedStatement ps = connection.prepareStatement(sql,
                     Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, recipe.getTitle());

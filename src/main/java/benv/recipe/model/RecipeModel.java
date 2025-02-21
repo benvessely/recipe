@@ -94,7 +94,7 @@ public class RecipeModel {
     }
 
     public void setCreatedAt(LocalDateTime createdAt) {
-        System.out.printf("Setting createdAt to %s%n", createdAt);
+        // System.out.printf("Setting createdAt to %s%n", createdAt);
         this.createdAt = createdAt;
     }
 
