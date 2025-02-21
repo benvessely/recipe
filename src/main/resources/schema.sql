@@ -22,5 +22,17 @@ CREATE TABLE IF NOT EXISTS ingredients (
     fat_per_100g DECIMAL,
     carbs_per_100g DECIMAL,
     fiber_per_100g DECIMAL,
+    total_sugar_per_100g DECIMAL,
+    sat_fat_per_100g DECIMAL,
+    cholesterol_per_100g DECIMAL,
+    sodium_per_100g DECIMAL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS portions (
+    id SERIAL PRIMARY KEY,
+    fdc_id INTEGER NOT NULL,
+    amount DECIMAL,
+    modifier VARCHAR(255) NOT NULL,
+    weight DECIMAL
 );
