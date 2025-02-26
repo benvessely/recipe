@@ -88,7 +88,7 @@ public class RecipeRepository {
     public RecipeModel getRecipeById(Integer id) {
         List<RecipeModel> results = jdbcTemplate.query(
                 "SELECT * FROM recipes WHERE id = ?",
-                recipeRowMapper,
+                recipeRowMapper
                 id
         );
 
