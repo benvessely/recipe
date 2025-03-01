@@ -13,6 +13,8 @@ import java.util.*;
 public class IngredientMatchService {
     private final JdbcTemplate jdbcTemplate;
     private final IngredientParserService ingredientParserService;
+    private Comparator<IngredientMatchModel> scoreComparator =
+            Comparator.comparingDouble(IngredientMatchModel::getConfidence);
 
     @Autowired
     private IngredientMatchService(JdbcTemplate jdbcTemplate,
@@ -28,30 +30,33 @@ public class IngredientMatchService {
 
         for (String ingredientLine : ingredients) {
             IngredientModel searchModel =  ingredientParserService.parse(ingredientLine);
-            PriorityQueue<IngredientMatchModel> matches = new ArrayList<>();
+            PriorityQueue<IngredientMatchModel> matchQueue = new PriorityQueue<>(scoreComparator);
 
-            singleMatches(searchModel, matches);
+            singleMatches(searchModel, matchQueue);
+
+            List<IngredientMatchModel> matchList = new ArrayList<>(matchQueue);
+
+            matchesContainer.put(searchModel.getIngredient(), matchList);
         }
 
         return matchesContainer;
     }
 
-    public List<IngredientMatchModel> singleMatches(IngredientModel searchModel, List<IngredientMatchModel> matches) {
+    public void singleMatches(IngredientModel searchModel,
+                              PriorityQueue<IngredientMatchModel> matchQueue) {
 
         String searchTerm = searchModel.getIngredient().trim().toLowerCase();
 
-        findExactMatches(searchTerm, matches);
+        findExactMatches(searchTerm, matchQueue);
 
-        if (matches.size() < 5) {
+        if (matchQueue.size() < 5) {
             List<Map<String, Object>> candidates = new ArrayList<>();
-            candidates = reduceCandidates(searchTerm);
-            matches = tokenSearch(searchTerm, candidates, matches);
+            reduceCandidates(searchTerm, candidates);
+            tokenSearch(searchTerm, candidates, matchQueue);
         }
-
-        return matches;
     }
 
-    private void findExactMatches(String searchTerm, List<IngredientMatchModel> matches) {
+    private void findExactMatches(String searchTerm, PriorityQueue<IngredientMatchModel> matchQueue) {
         String sql = "SELECT fdc_id, name FROM ingredients WHERE LOWER(name) = ?";
         List<Map<String, Object>> exactMatches = jdbcTemplate.queryForList(sql, searchTerm);
 
@@ -62,12 +67,13 @@ public class IngredientMatchService {
                 newMatch.setFdcId((Integer) exactMatch.get("fdc_id"));
                 newMatch.setName((String) exactMatch.get("name"));
                 newMatch.setConfidence(1.0);
-                matches.add(newMatch);
+                matchQueue.offer(newMatch);
             }
         }
     }
 
-    private List<Map<String, Object>> reduceCandidates(String searchTerm) {
+    private void reduceCandidates(String searchTerm,
+                                  List<Map<String, Object>> candidates) {
         Set<String> qualifiers = new HashSet<>(Arrays.asList(
                 "dried", "fresh", "frozen", "canned", "sliced", "diced", "chopped",
                 "minced", "grated", "whole", "ground", "crushed", "peeled", "raw",
@@ -84,16 +90,18 @@ public class IngredientMatchService {
             }
         }
 
+        List<String> mainIngredientVariations = new ArrayList<>(mainIngredients);
+
         // Add all possible variations of the main ingredients to the mainIngredients list
         for (String mainIngredient : mainIngredients) {
             if (mainIngredient.endsWith("ies")) {
-                mainIngredients.add(mainIngredient.substring(0, mainIngredient.length() - 3) + "y");
+                mainIngredientVariations.add(mainIngredient.substring(0, mainIngredient.length() - 3) + "y");
             }
             else if (mainIngredient.endsWith("es")) {
-                mainIngredients.add(mainIngredient.substring(0, mainIngredient.length() - 2));
+                mainIngredientVariations.add(mainIngredient.substring(0, mainIngredient.length() - 2));
             }
             else if (mainIngredient.endsWith("s")) {
-                mainIngredients.add(mainIngredient.substring(0, mainIngredient.length() - 1));
+                mainIngredientVariations.add(mainIngredient.substring(0, mainIngredient.length() - 1));
             }
         }
 
@@ -102,22 +110,22 @@ public class IngredientMatchService {
         List<String> params = new ArrayList<>();
 
         // Remember that mainIngredients holds variations now
-        for (String mainIngredient : mainIngredients) {
-            if (mainIngredient.length() >= 3) {
+        for (String mainIngredientVariation : mainIngredientVariations) {
+            if (mainIngredientVariation.length() >= 3) {
                 conditions.add("LOWER(name) LIKE ?");
-                params.add("%" + mainIngredient + "%");
+                params.add("%" + mainIngredientVariation + "%");
             }
         }
 
         sql.append(String.join(" OR ", conditions));
 
-        List<Map<String, Object>> candidates = jdbcTemplate.queryForList(sql.toString(), params);
-        System.out.printf("For main ingredients {}, number of candidates is {}",
-                mainIngredients, candidates.size());
+        candidates = jdbcTemplate.queryForList(sql.toString(), params.toArray());
+        System.out.printf("For main ingredient variations {}, number of candidates is {}",
+                mainIngredientVariations, candidates.size());
     }
 
-    public List<IngredientMatchModel> tokenSearch (String searchTerm, List<Map<String,
-            Object>> dbCandidates, List<IngredientMatchModel> matches ) {
+    public void tokenSearch (String searchTerm, List<Map<String,
+            Object>> dbCandidates, PriorityQueue<IngredientMatchModel> matchQueue ) {
         Set<String> qualifiers = new HashSet<>(Arrays.asList(
                 "dried", "fresh", "frozen", "canned", "sliced", "diced", "chopped",
                 "minced", "grated", "whole", "ground", "crushed", "peeled", "raw",
@@ -169,14 +177,34 @@ public class IngredientMatchService {
 
                 totalScore += bestMatchScore * tokenWeight;
             }
-
-            if (totalScore > 0.3) {
-                IngredientMatchModel match = new IngredientMatchModel;
+            double normalizedScore = totalScore / maxScore;
+            if (normalizedScore > 0.3) {
+                IngredientMatchModel match = new IngredientMatchModel();
                 match.setFdcId(fdcId);
-                match.setName();
+                match.setName(name);
+                match.setConfidence(normalizedScore);
+
+                addToLimitedQueue(matchQueue, match, 5);
             }
         }
     }
+
+    private void addToLimitedQueue(
+            PriorityQueue<IngredientMatchModel> queue,
+            IngredientMatchModel item,
+            int maxSize) {
+
+        if (queue.size() < maxSize) {
+            queue.add(item);
+        }
+        IngredientMatchModel lowest = queue.peek();
+        if (lowest != null && lowest.getConfidence() < item.getConfidence()) {
+            queue.poll();
+            queue.offer(item);
+        }
+    }
+
+
 
     private double normalizedLevSimilarity(String searchToken, String dbToken) {
         int[][] distance = new int[searchToken.length() + 1][dbToken.length() + 1];
