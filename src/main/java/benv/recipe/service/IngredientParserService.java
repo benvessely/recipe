@@ -8,7 +8,6 @@ import java.util.regex.Pattern;
 
 @Service
 public class IngredientParserService {
-    // Common cooking units
     private static final Set<String> UNITS = new HashSet<>(Arrays.asList(
             "cup", "cups", "tablespoon", "tablespoons", "tbsp",
             "teaspoon", "teaspoons", "tsp", "pound", "pounds", "lb",
@@ -16,14 +15,12 @@ public class IngredientParserService {
             "kilogram", "kg", "ml", "milliliter", "liter"
     ));
 
-    // Common quantity words
     private static final Set<String> QUANTITY_WORDS = new HashSet<>(Arrays.asList(
             "bunch", "pinch", "handful", "dash", "piece", "slice", "slices",
             "large", "medium", "small", "whole"
     ));
 
     public IngredientModel parse(String ingredientText) {
-        // Clean the input
         String cleaned = ingredientText.toLowerCase().trim()
                 .replaceAll("\\s+", " ")
                 .replaceAll("[,;()]", "");
@@ -38,7 +35,7 @@ public class IngredientParserService {
 
     private void parseComponents(String text, IngredientModel result) {
         String[] words = text.split(" ");
-        StringBuilder ingredientBuilder = new StringBuilder();
+        StringBuilder mainIngredientBuilder = new StringBuilder();
         boolean foundQuantity = false;
 
         for (String word : words) {
@@ -56,16 +53,16 @@ public class IngredientParserService {
                 continue;
             }
 
-            // At this point, word is part of main ingredient (not measure)
-            if (!ingredientBuilder.isEmpty()) {
-                ingredientBuilder.append(" ");
+            // At this point, word is part of main ingredient (not unit or quantity)
+            if (!mainIngredientBuilder.isEmpty()) {
+                mainIngredientBuilder.append(" ");
             }
-            ingredientBuilder.append(word);
+            mainIngredientBuilder.append(word);
         }
 
-        String ingredientName = ingredientBuilder.toString().trim();
-        if (!ingredientName.isEmpty()) {
-            result.setIngredient(ingredientName);
+        String mainIngredient = mainIngredientBuilder.toString().trim();
+        if (!mainIngredient.isEmpty()) {
+            result.setMainIngredient(mainIngredient);
         }
     }
 

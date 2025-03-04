@@ -25,7 +25,7 @@ public class IngredientParserTest {
         logger.info(result.toString());
         assertEquals(2, result.getAmount());
         assertEquals("cups", result.getUnit());
-        assertEquals("flour", result.getIngredient());
+        assertEquals("flour", result.getMainIngredient());
     }
 
     @Test
@@ -35,7 +35,7 @@ public class IngredientParserTest {
         logger.info(result.toString());
         assertEquals(0.5, result.getAmount());
         assertEquals("tbsp", result.getUnit());
-        assertEquals("olive oil", result.getIngredient());
+        assertEquals("olive oil", result.getMainIngredient());
     }
 
     @Test
@@ -45,6 +45,6 @@ public class IngredientParserTest {
         logger.info(result.toString());
         assertNull(result.getAmount());
         assertEquals("pinch", result.getUnit());
-        assertEquals("salt", result.getIngredient());
+        assertEquals("salt", result.getMainIngredient());
     }
 }
