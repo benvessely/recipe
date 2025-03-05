@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+import static java.lang.Math.max;
+
 @Service
 public class IngredientMatchService {
     int MATCH_COUNT = 5;
@@ -153,8 +155,6 @@ public class IngredientMatchService {
             }
 
             double totalScore = 0;
-            // Will build the max_score as we go and use it to normalize at the end
-            double maxScore = 0;
 
             for (String searchToken : searchTokens) {
                 // logger.info("searchToken is {}", searchToken);
@@ -165,7 +165,7 @@ public class IngredientMatchService {
                 } else {
                     tokenWeight = 1.0;
                 }
-                maxScore += tokenWeight;
+
 
                 // This is unique to each search token, represents closest match between search
                 // token and any db token.
@@ -180,30 +180,40 @@ public class IngredientMatchService {
                     }
                 }
 
-                for (String dbToken : dbCandidateTokens) {
-                    dbToken = dbToken.toLowerCase();
-                    // logger.info("dbToken is {} in Levenshtein loop", dbToken);
-                    if (searchToken.length() >= 3 && dbToken.length() >= 3) {
-                        double similarity = normalizedLevSimilarity(searchToken, dbToken);
-                        // logger.info("Similarity score for search token {} and db " +
-                        //         "token {} is {}", searchToken, dbToken, similarity);
-                        bestMatchScore = Math.max(bestMatchScore, similarity);
+                // If we haven't yet found a perfect match for the searchToken, we enter this
+                // if statement and check for similarity via Levenshtein distance
+                if (bestMatchScore != 1.0) {
+                    for (String dbToken : dbCandidateTokens) {
+                        dbToken = dbToken.toLowerCase();
+                        // logger.info("dbToken is {} in Levenshtein loop", dbToken);
+                        if (searchToken.length() >= 3 && dbToken.length() >= 3) {
+                            double similarity = normalizedLevSimilarity(searchToken, dbToken);
+                            // logger.info("Similarity score for search token {} and db " +
+                            //         "token {} is {}", searchToken, dbToken, similarity);
+                            bestMatchScore = max(bestMatchScore, similarity);
+
+                        }
                     }
                 }
-
-                totalScore += bestMatchScore * tokenWeight;
+                // If the searchToken matched reasonably well with one of the dbTokens, it
+                // contributes positively to the score.
+                // TODO Maybe add a negative influence to score in else case, when the
+                // TODO searchTerm isn't very similar to any dbTerm
+                if (bestMatchScore > 0.7) {
+                    totalScore += bestMatchScore * tokenWeight;
+                }
             }
-            // TODO work on this, might want to weight qualifiers lower instead of using .length
-            double normalizedScore = totalScore / dbCandidateTokens.length;
+            // Score is count of number of tokens, where qualifiers count as 0.5.
+            double maxTokenScore = max(calculateTokenSum(searchTokens),
+                                       calculateTokenSum(dbCandidateTokens));
+            double normalizedScore = totalScore / maxTokenScore;
             // logger.info("normalizedScore is {}", normalizedScore);
-            if (normalizedScore > 0.3) {
-                IngredientMatchModel match = new IngredientMatchModel();
-                match.setFdcId(fdcId);
-                match.setName(name);
-                match.setConfidence(normalizedScore);
+            IngredientMatchModel match = new IngredientMatchModel();
+            match.setFdcId(fdcId);
+            match.setName(name);
+            match.setConfidence(normalizedScore);
 
-                addToLimitedQueue(matchQueue, match);
-            }
+            addToLimitedQueue(matchQueue, match);
         }
     }
 
@@ -263,11 +273,31 @@ public class IngredientMatchService {
             }
         }
 
-        int maxLength = Math.max(searchToken.length(), dbToken.length());
+        int maxLength = max(searchToken.length(), dbToken.length());
 
         double normalizedSimilarity = 1.0 - ((double) distance[searchToken.length()][dbToken.length()] / maxLength);
 
         return normalizedSimilarity;
+    }
+
+    /**
+     * This function calculates a value that is used to normalize the Levenshtein similarity
+     * scores via division. This value is basically just the count of the number of terms in
+     * tokenList, but with qualifiers giving only half a point to the count.
+     *
+     * @param tokenList
+     * @return score
+     */
+    private double calculateTokenSum(String[] tokenList) {
+        double score = 0.0;
+        for (String term : tokenList) {
+            if (qualifiers.contains(term)) {
+                score += 0.5;
+            } else {
+                score += 1.0;
+            }
+        }
+        return score;
     }
 
 }
