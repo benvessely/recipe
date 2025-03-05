@@ -14,6 +14,13 @@ import java.util.*;
 @Service
 public class IngredientMatchService {
     int MATCH_COUNT = 5;
+    Set<String> qualifiers = new HashSet<>(Arrays.asList(
+            "dried", "fresh", "frozen", "canned", "sliced", "diced", "chopped",
+            "minced", "grated", "whole", "ground", "crushed", "peeled", "raw",
+            "cooked", "boiled", "roasted", "baked", "fried", "steamed", "sweet",
+            "sour", "bitter", "spicy", "hot", "cold", "warm", "ripe", "unripe",
+            "stemmed", "cored"
+    ));
 
     private final JdbcTemplate jdbcTemplate;
     private final IngredientParserService ingredientParserService;
@@ -87,14 +94,6 @@ public class IngredientMatchService {
 
     private List<Map<String, Object>> reduceCandidates(String searchTerm,
                                                        List<Map<String, Object>> candidates) {
-        Set<String> qualifiers = new HashSet<>(Arrays.asList(
-                "dried", "fresh", "frozen", "canned", "sliced", "diced", "chopped",
-                "minced", "grated", "whole", "ground", "crushed", "peeled", "raw",
-                "cooked", "boiled", "roasted", "baked", "fried", "steamed", "sweet",
-                "sour", "bitter", "spicy", "hot", "cold", "warm", "ripe", "unripe",
-                "stemmed", "cored"
-        ));
-
         List<String> ingredientWords = List.of(searchTerm.split("\\s+"));
         List<String> mainIngredients = new ArrayList<>();
         for (String word : ingredientWords) {
@@ -138,13 +137,7 @@ public class IngredientMatchService {
 
     public void tokenSearch (String searchTerm, List<Map<String,
             Object>> dbCandidates, PriorityQueue<IngredientMatchModel> matchQueue ) {
-        Set<String> qualifiers = new HashSet<>(Arrays.asList(
-                "dried", "fresh", "frozen", "canned", "sliced", "diced", "chopped",
-                "minced", "grated", "whole", "ground", "crushed", "peeled", "raw",
-                "cooked", "boiled", "roasted", "baked", "fried", "steamed", "sweet",
-                "sour", "bitter", "spicy", "hot", "cold", "warm", "ripe", "unripe",
-                "stemmed", "cored"
-        ));
+
         logger.info("In tokenSearch, searchTerm is {}", searchTerm);
 
         String[] searchTokens = searchTerm.split("\\s+");
