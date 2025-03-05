@@ -69,11 +69,11 @@ public class IngredientMatchService {
     private void findExactMatches(String searchTerm, PriorityQueue<IngredientMatchModel> matchQueue) {
         String sql = "SELECT fdc_id, name FROM ingredients WHERE LOWER(name) = ?";
         List<Map<String, Object>> exactMatches = jdbcTemplate.queryForList(sql, searchTerm);
-        logger.info("In findExactMatches");
+        // logger.info("In findExactMatches");
 
         if (!exactMatches.isEmpty()){
             for (Map<String, Object> exactMatch : exactMatches ) {
-                logger.info("Exact match is {} for searchTerm {}", exactMatch, searchTerm);
+                // logger.info("Exact match is {} for searchTerm {}", exactMatch, searchTerm);
                 IngredientMatchModel newMatch = new IngredientMatchModel();
                 // Need to cast here because queryForList() returns a map with values that are simply Objects
                 newMatch.setFdcId((Integer) exactMatch.get("fdc_id"));
@@ -117,7 +117,7 @@ public class IngredientMatchService {
             }
         }
 
-        logger.info("mainIngredientVariations are {}", mainIngredientVariations);
+        // logger.info("mainIngredientVariations are {}", mainIngredientVariations);
 
         StringBuilder sql = new StringBuilder("SELECT fdc_id, name FROM ingredients WHERE ");
         List<String> conditions = new ArrayList<>();
@@ -163,7 +163,7 @@ public class IngredientMatchService {
             double maxScore = 0;
 
             for (String searchToken : searchTokens) {
-                logger.info("searchToken is {}", searchToken);
+                // logger.info("searchToken is {}", searchToken);
                 double tokenWeight;
                 // Get lower score for matching with a qualifier than part of main ingredient
                 if (qualifiers.contains(searchToken)) {
@@ -188,19 +188,20 @@ public class IngredientMatchService {
 
                 for (String dbToken : dbCandidateTokens) {
                     dbToken = dbToken.toLowerCase();
-                    logger.info("dbToken is {} in Levenshtein loop", dbToken);
+                    // logger.info("dbToken is {} in Levenshtein loop", dbToken);
                     if (searchToken.length() >= 3 && dbToken.length() >= 3) {
                         double similarity = normalizedLevSimilarity(searchToken, dbToken);
-                        logger.info("Similarity score for search token {} and db " +
-                                "token {} is {}", searchToken, dbToken, similarity);
+                        // logger.info("Similarity score for search token {} and db " +
+                        //         "token {} is {}", searchToken, dbToken, similarity);
                         bestMatchScore = Math.max(bestMatchScore, similarity);
                     }
                 }
 
                 totalScore += bestMatchScore * tokenWeight;
             }
-            double normalizedScore = totalScore / maxScore;
-            logger.info("normalizedScore is {}", normalizedScore);
+            // TODO work on this, might want to weight qualifiers lower instead of using .length
+            double normalizedScore = totalScore / dbCandidateTokens.length;
+            // logger.info("normalizedScore is {}", normalizedScore);
             if (normalizedScore > 0.3) {
                 IngredientMatchModel match = new IngredientMatchModel();
                 match.setFdcId(fdcId);
@@ -213,18 +214,35 @@ public class IngredientMatchService {
     }
 
     private void addToLimitedQueue(
-            PriorityQueue<IngredientMatchModel> queue,
+            PriorityQueue<IngredientMatchModel> matchQueue,
             IngredientMatchModel item) {
 
-        if (queue.size() < MATCH_COUNT) {
-            queue.add(item);
+        // Prevents duplicate entries into queue
+        IngredientMatchModel[] matchArray = matchQueue.toArray(new IngredientMatchModel[0]);
+        for (IngredientMatchModel match: matchArray) {
+            if (item.getFdcId().equals(match.getFdcId())) {
+                return;
+            }
         }
-        IngredientMatchModel lowest = queue.peek();
-        IngredientMatchModel deleted = null;
-        if (lowest != null && lowest.getConfidence() < item.getConfidence()) {
-            deleted = queue.poll();
-            queue.offer(item);
-            logger.info("queue updated, deleted {} and added {}", deleted, item);
+
+        if (matchQueue.size() < MATCH_COUNT) {
+            matchQueue.add(item);
+            logger.info("matchQueue updated, added item with name {}", item.getName());
+        }
+        else {
+            IngredientMatchModel lowest = matchQueue.peek();
+            IngredientMatchModel deleted = null;
+            if (lowest != null && lowest.getConfidence() < item.getConfidence()) {
+                deleted = matchQueue.poll();
+                matchQueue.offer(item);
+                logger.info("matchQueue updated, deleted element with name {} and added element with name {}",
+                        deleted.getName(), item.getName());
+            }
+        }
+
+        System.out.println("\nQueue contents using enhanced for-loop:");
+        for (IngredientMatchModel element : matchQueue) {
+            System.out.println("- " + element.getName());
         }
     }
 
