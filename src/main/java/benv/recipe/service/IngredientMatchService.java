@@ -44,6 +44,7 @@ public class IngredientMatchService {
             singleMatches(searchModel, matchQueue);
 
             List<IngredientMatchModel> matchList = new ArrayList<>(matchQueue);
+            matchList.sort(Comparator.comparing(IngredientMatchModel::getConfidence).reversed());
             matchesContainer.put(searchModel.getMainIngredient(), matchList);
         }
 
