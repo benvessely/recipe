@@ -23,6 +23,10 @@ public class IngredientMatchService {
             "sour", "bitter", "spicy", "hot", "cold", "warm", "ripe", "unripe",
             "stemmed", "cored"
     ));
+    Set<String> grammar = new HashSet<>(Arrays.asList(
+            "and", "of", "for", "but", "on", "in", "a", "an", "to", "with", "by", "at",
+            "from", "as"
+    ));
 
     private final JdbcTemplate jdbcTemplate;
     private final IngredientParserService ingredientParserService;
@@ -104,7 +108,7 @@ public class IngredientMatchService {
         List<String> ingredientWords = List.of(searchTerm.split("\\s+"));
         List<String> mainIngredients = new ArrayList<>();
         for (String word : ingredientWords) {
-            if (!qualifiers.contains(word) && word.length() >= 3) {
+            if (!qualifiers.contains(word) && !grammar.contains(word)) {
                 mainIngredients.add(word);
             }
         }
@@ -148,9 +152,12 @@ public class IngredientMatchService {
         logger.info("In tokenSearch, searchTerm is {}", searchTerm);
 
         String[] searchSplit = searchTerm.split("\\s+");
-        String[] searchTokens = new String[searchSplit.length];
-        for (int i = 0 ; i < searchSplit.length ; i++) {
-            searchTokens[i] = searchSplit[i].replaceAll("[,()]", "");
+        List<String> searchTokens = new ArrayList<>();
+        for (String splitWord : searchSplit) {
+            String cleanWord = splitWord.replaceAll("[,()]", "").toLowerCase();
+            if (!grammar.contains(cleanWord)) {
+                searchTokens.add(cleanWord);
+            }
         }
 
         for (Map<String, Object> dbCandidate : dbCandidates) {
@@ -159,10 +166,12 @@ public class IngredientMatchService {
             String name = (String) dbCandidate.get("name");
 
             String[] dbCandidateSplit = name.split("\\s+");
-            String[] dbCandidateTokens = new String[dbCandidateSplit.length];
-            for (int i = 0 ; i < dbCandidateSplit.length ; i++) {
-                dbCandidateTokens[i] = dbCandidateSplit[i]
-                        .replaceAll("[,()]", "");
+            List<String> dbCandidateTokens = new ArrayList<>();
+            for (String splitWord : dbCandidateSplit) {
+                String cleanWord = splitWord.replaceAll("[,()]", "").toLowerCase();
+                if (!grammar.contains(cleanWord)) {
+                    dbCandidateTokens.add(cleanWord);
+                }
             }
 
             double totalScore = 0;
@@ -176,7 +185,6 @@ public class IngredientMatchService {
                 } else {
                     tokenWeight = 1.0;
                 }
-
 
                 // This is unique to each search token, represents closest match between search
                 // token and any db token.
@@ -213,14 +221,14 @@ public class IngredientMatchService {
                 // TODO searchTerm isn't very similar to any dbTerm
                 if (bestMatchScore > 0.8) {
                     totalScore += bestMatchScore * tokenWeight;
-                    logger.info("bestMatchScore is {}, setting total score to {}",
-                            bestMatchScore, totalScore);
+                    logger.info("bestMatchScore is {} for searchTerm {}, setting total score " +
+                                    "to {}", bestMatchScore, searchTerm, totalScore);
                 }
             }
             // Score is count of number of tokens, where qualifiers count as 0.5.
-            double maxTokenScore = max(calculateTokenSum(searchTokens),
+            double maxTokenCount = max(calculateTokenSum(searchTokens),
                                        calculateTokenSum(dbCandidateTokens));
-            double normalizedScore = totalScore / maxTokenScore;
+            double normalizedScore = totalScore / maxTokenCount;
             logger.info("normalizedScore is {}", normalizedScore);
             IngredientMatchModel match = new IngredientMatchModel();
             match.setFdcId(fdcId);
@@ -302,7 +310,7 @@ public class IngredientMatchService {
      * @param tokenList
      * @return score
      */
-    private double calculateTokenSum(String[] tokenList) {
+    private double calculateTokenSum(List<String> tokenList) {
         double score = 0.0;
         for (String term : tokenList) {
             if (qualifiers.contains(term)) {
