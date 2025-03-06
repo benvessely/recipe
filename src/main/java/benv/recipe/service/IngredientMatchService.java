@@ -71,7 +71,12 @@ public class IngredientMatchService {
         if (matchQueue.size() < 5) {
             List<Map<String, Object>> candidates = new ArrayList<>();
             candidates = reduceCandidates(searchTerm, candidates);
-            logger.info("candidates List is {}", candidates);
+
+            System.out.println("Candidates list is:");
+            for (Map<String, Object> candidate : candidates) {
+                System.out.println(candidate);
+            }
+
             tokenSearch(searchTerm, candidates, matchQueue);
         }
     }
@@ -142,13 +147,23 @@ public class IngredientMatchService {
 
         logger.info("In tokenSearch, searchTerm is {}", searchTerm);
 
-        String[] searchTokens = searchTerm.split("\\s+");
+        String[] searchSplit = searchTerm.split("\\s+");
+        String[] searchTokens = new String[searchSplit.length];
+        for (int i = 0 ; i < searchSplit.length ; i++) {
+            searchTokens[i] = searchSplit[i].replaceAll("\\p{Punct}", "");
+        }
+
         for (Map<String, Object> dbCandidate : dbCandidates) {
             logger.info("dbCandidate is {}", dbCandidate);
             Integer fdcId = (Integer) dbCandidate.get("fdc_id");
             String name = (String) dbCandidate.get("name");
 
-            String[] dbCandidateTokens = name.split("\\s+");
+            String[] dbCandidateSplit = name.split("\\s+");
+            String[] dbCandidateTokens = new String[dbCandidateSplit.length];
+            for (int i = 0 ; i < dbCandidateSplit.length ; i++) {
+                dbCandidateTokens[i] = dbCandidateSplit[i]
+                        .replaceAll("\\p{Punct}", "");
+            }
 
             for (int i = 0; i < dbCandidateTokens.length ; i++) {
                 dbCandidateTokens[i] = dbCandidateTokens[i].replace(",", "");
@@ -188,8 +203,8 @@ public class IngredientMatchService {
                         // logger.info("dbToken is {} in Levenshtein loop", dbToken);
                         if (searchToken.length() >= 3 && dbToken.length() >= 3) {
                             double similarity = normalizedLevSimilarity(searchToken, dbToken);
-                            // logger.info("Similarity score for search token {} and db " +
-                            //         "token {} is {}", searchToken, dbToken, similarity);
+                            logger.info("Similarity score for search token {} and db " +
+                                     "token {} is {}", searchToken, dbToken, similarity);
                             bestMatchScore = max(bestMatchScore, similarity);
 
                         }
@@ -200,6 +215,7 @@ public class IngredientMatchService {
                 // TODO Maybe add a negative influence to score in else case, when the
                 // TODO searchTerm isn't very similar to any dbTerm
                 if (bestMatchScore > 0.8) {
+                    logger.info("bestMatchScore is {}, setting total score now", bestMatchScore);
                     totalScore += bestMatchScore * tokenWeight;
                 }
             }
@@ -207,7 +223,7 @@ public class IngredientMatchService {
             double maxTokenScore = max(calculateTokenSum(searchTokens),
                                        calculateTokenSum(dbCandidateTokens));
             double normalizedScore = totalScore / maxTokenScore;
-            // logger.info("normalizedScore is {}", normalizedScore);
+            logger.info("normalizedScore is {}", normalizedScore);
             IngredientMatchModel match = new IngredientMatchModel();
             match.setFdcId(fdcId);
             match.setName(name);
