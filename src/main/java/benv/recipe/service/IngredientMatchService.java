@@ -150,7 +150,7 @@ public class IngredientMatchService {
         String[] searchSplit = searchTerm.split("\\s+");
         String[] searchTokens = new String[searchSplit.length];
         for (int i = 0 ; i < searchSplit.length ; i++) {
-            searchTokens[i] = searchSplit[i].replaceAll("\\p{Punct}", "");
+            searchTokens[i] = searchSplit[i].replaceAll("[,()]", "");
         }
 
         for (Map<String, Object> dbCandidate : dbCandidates) {
@@ -162,11 +162,7 @@ public class IngredientMatchService {
             String[] dbCandidateTokens = new String[dbCandidateSplit.length];
             for (int i = 0 ; i < dbCandidateSplit.length ; i++) {
                 dbCandidateTokens[i] = dbCandidateSplit[i]
-                        .replaceAll("\\p{Punct}", "");
-            }
-
-            for (int i = 0; i < dbCandidateTokens.length ; i++) {
-                dbCandidateTokens[i] = dbCandidateTokens[i].replace(",", "");
+                        .replaceAll("[,()]", "");
             }
 
             double totalScore = 0;
@@ -190,6 +186,7 @@ public class IngredientMatchService {
                 // db tokens for exact matches first before performing Levenshtein distance
                 for (String dbToken : dbCandidateTokens) {
                     if (searchToken.equals(dbToken)) {
+                        logger.info("Found exact match with searchToken {} and dbToken {}", searchToken, dbToken);
                         bestMatchScore = 1.0;
                         break;
                     }
@@ -215,8 +212,9 @@ public class IngredientMatchService {
                 // TODO Maybe add a negative influence to score in else case, when the
                 // TODO searchTerm isn't very similar to any dbTerm
                 if (bestMatchScore > 0.8) {
-                    logger.info("bestMatchScore is {}, setting total score now", bestMatchScore);
                     totalScore += bestMatchScore * tokenWeight;
+                    logger.info("bestMatchScore is {}, setting total score to {}",
+                            bestMatchScore, totalScore);
                 }
             }
             // Score is count of number of tokens, where qualifiers count as 0.5.
