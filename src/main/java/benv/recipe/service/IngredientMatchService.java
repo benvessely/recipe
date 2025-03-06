@@ -195,11 +195,11 @@ public class IngredientMatchService {
                         }
                     }
                 }
-                // If the searchToken matched reasonably well with one of the dbTokens, it
+                // If the searchToken matched pretty well with one of the dbTokens, it
                 // contributes positively to the score.
                 // TODO Maybe add a negative influence to score in else case, when the
                 // TODO searchTerm isn't very similar to any dbTerm
-                if (bestMatchScore > 0.7) {
+                if (bestMatchScore > 0.8) {
                     totalScore += bestMatchScore * tokenWeight;
                 }
             }
