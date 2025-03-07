@@ -16,6 +16,9 @@ import static java.lang.Math.max;
 @Service
 public class IngredientMatchService {
     int MATCH_COUNT = 10;
+    double STANDARD_WEIGHT = 1.0;
+    double QUALIFIER_WEIGHT = 0.5;
+    double COMMON_WORD_WEIGHT = 0.2;
     Set<String> qualifiers = new HashSet<>(Arrays.asList(
             "dried", "fresh", "frozen", "canned", "sliced", "diced", "chopped",
             "minced", "grated", "whole", "ground", "crushed", "peeled", "raw",
@@ -26,6 +29,10 @@ public class IngredientMatchService {
     Set<String> grammar = new HashSet<>(Arrays.asList(
                 "a", "an", "the", "in", "on", "at", "by", "for", "with", "from", "of", "to",
                 "and", "but", "or", "nor", "so", "yet", "as", "because", "if", "when", "while"
+    ));
+    Set<String> commonWords = new HashSet<>(Arrays.asList(
+            "oil", "flour", "sugar", "salt", "water", "sauce", "powder",
+            "fresh", "dried", "milk", "cream", "juice", "extract"
     ));
 
 
@@ -58,6 +65,7 @@ public class IngredientMatchService {
             singleMatches(searchModel, matchQueue);
 
             List<IngredientMatchModel> matchList = new ArrayList<>(matchQueue);
+            // TODO Sort tertiarily by number of characters in name
             matchList.sort(Comparator.comparing(IngredientMatchModel::getConfidence).reversed()
                     .thenComparing(match -> match.getName().split("\\s+").length));
             matchesContainer.put(searchModel.getMainIngredient(), matchList);
@@ -185,9 +193,11 @@ public class IngredientMatchService {
                 double tokenWeight;
                 // Get lower score for matching with a qualifier than part of main ingredient
                 if (qualifiers.contains(searchToken)) {
-                    tokenWeight = 0.5;
+                    tokenWeight = QUALIFIER_WEIGHT;
+                } else if (commonWords.contains(searchToken)) {
+                    tokenWeight = COMMON_WORD_WEIGHT;
                 } else {
-                    tokenWeight = 1.0;
+                    tokenWeight = STANDARD_WEIGHT;
                 }
 
                 // This is unique to each search token, represents closest match between search
@@ -221,8 +231,7 @@ public class IngredientMatchService {
                 }
                 // If the searchToken matched pretty well with one of the dbTokens, it
                 // contributes positively to the score.
-                // TODO Maybe add a negative influence to score in else case, when the
-                // TODO searchTerm isn't very similar to any dbTerm
+                // TODO Update this value and use geq
                 if (bestMatchScore > 0.8) {
                     totalScore += bestMatchScore * tokenWeight;
                     logger.info("bestMatchScore is {} for searchToken {}, setting total score " +
@@ -324,10 +333,13 @@ public class IngredientMatchService {
                 logger.info("Found grammar word {}", term);
                 continue;
             }
-            else if (qualifiers.contains(term)) {
-                score += 0.5;
+            else if (commonWords.contains(term) ) {
+                score += COMMON_WORD_WEIGHT;
+            }
+            else if (qualifiers.contains(term) ) {
+                score += QUALIFIER_WEIGHT;
             } else {
-                score += 1.0;
+                score += STANDARD_WEIGHT;
             }
         }
         logger.info("Final token sum is {}", score);
