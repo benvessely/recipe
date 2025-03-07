@@ -15,7 +15,7 @@ import static java.lang.Math.max;
 
 @Service
 public class IngredientMatchService {
-    int MATCH_COUNT = 5;
+    int MATCH_COUNT = 10;
     Set<String> qualifiers = new HashSet<>(Arrays.asList(
             "dried", "fresh", "frozen", "canned", "sliced", "diced", "chopped",
             "minced", "grated", "whole", "ground", "crushed", "peeled", "raw",
@@ -24,9 +24,10 @@ public class IngredientMatchService {
             "stemmed", "cored"
     ));
     Set<String> grammar = new HashSet<>(Arrays.asList(
-            "and", "of", "for", "but", "on", "in", "a", "an", "to", "with", "by", "at",
-            "from", "as"
+                "a", "an", "the", "in", "on", "at", "by", "for", "with", "from", "of", "to",
+                "and", "but", "or", "nor", "so", "yet", "as", "because", "if", "when", "while"
     ));
+
 
     private final JdbcTemplate jdbcTemplate;
     private final IngredientParserService ingredientParserService;
@@ -73,7 +74,7 @@ public class IngredientMatchService {
         findExactMatches(searchTerm, matchQueue);
 
         logger.info("Before check that matchQueue.size() < 5, matchQueue is {}", matchQueue);
-        if (matchQueue.size() < 5) {
+        if (matchQueue.size() < MATCH_COUNT) {
             List<Map<String, Object>> candidates = new ArrayList<>();
             candidates = reduceCandidates(searchTerm, candidates);
 
@@ -224,8 +225,8 @@ public class IngredientMatchService {
                 // TODO searchTerm isn't very similar to any dbTerm
                 if (bestMatchScore > 0.8) {
                     totalScore += bestMatchScore * tokenWeight;
-                    logger.info("bestMatchScore is {} for searchTerm {}, setting total score " +
-                                    "to {}", bestMatchScore, searchTerm, totalScore);
+                    logger.info("bestMatchScore is {} for searchToken {}, setting total score " +
+                                    "to {}", bestMatchScore, searchToken, totalScore);
                 }
             }
             // Score is count of number of tokens, where qualifiers count as 0.5.
@@ -316,13 +317,20 @@ public class IngredientMatchService {
      */
     private double calculateTokenSum(List<String> tokenList) {
         double score = 0.0;
+        logger.info("tokenList is {}", tokenList);
         for (String term : tokenList) {
-            if (qualifiers.contains(term)) {
+            logger.info("Token sum is {}, term is {}", score, term);
+            if (grammar.contains(term)) {
+                logger.info("Found grammar word {}", term);
+                continue;
+            }
+            else if (qualifiers.contains(term)) {
                 score += 0.5;
             } else {
                 score += 1.0;
             }
         }
+        logger.info("Final token sum is {}", score);
         return score;
     }
 
