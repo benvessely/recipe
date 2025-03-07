@@ -271,12 +271,31 @@ public class IngredientMatchService {
         }
         else {
             IngredientMatchModel lowest = matchQueue.peek();
-            IngredientMatchModel deleted = null;
-            if (lowest != null && lowest.getConfidence() < item.getConfidence()) {
-                deleted = matchQueue.poll();
+            if (lowest.getConfidence() < item.getConfidence()) {
+                IngredientMatchModel deleted = matchQueue.poll();
                 matchQueue.offer(item);
                 logger.info("matchQueue updated, deleted element with name {} and added element with name {}",
                         deleted.getName(), item.getName());
+            } else if (lowest.getConfidence() == item.getConfidence()) {
+                List<IngredientMatchModel> tiedElements = new ArrayList<>();
+
+                // Collect all elements with the same lowest confidence
+                for (IngredientMatchModel match : matchQueue) {
+                    if (match.getConfidence() == lowest.getConfidence()) {
+                        tiedElements.add(match);
+                    }
+                }
+
+                IngredientMatchModel elementToRemove = tiedElements.stream()
+                        .max(Comparator.comparingInt(m -> m.getName().split("\\s+").length))
+                        .orElse(lowest);
+
+                matchQueue.remove(elementToRemove);
+                matchQueue.offer(item);
+                logger.info("Tie handling: removed {} ({} words) and added {}",
+                        elementToRemove.getName(),
+                        elementToRemove.getName().split("\\s+").length,
+                        item.getName());
             }
         }
 
