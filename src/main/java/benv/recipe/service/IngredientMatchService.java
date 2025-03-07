@@ -57,7 +57,8 @@ public class IngredientMatchService {
             singleMatches(searchModel, matchQueue);
 
             List<IngredientMatchModel> matchList = new ArrayList<>(matchQueue);
-            matchList.sort(Comparator.comparing(IngredientMatchModel::getConfidence).reversed());
+            matchList.sort(Comparator.comparing(IngredientMatchModel::getConfidence).reversed()
+                    .thenComparing(match -> match.getName().split("\\s+").length));
             matchesContainer.put(searchModel.getMainIngredient(), matchList);
         }
 
@@ -128,7 +129,7 @@ public class IngredientMatchService {
             }
         }
 
-        // logger.info("mainIngredientVariations are {}", mainIngredientVariations);
+         logger.info("mainIngredientVariations are {}", mainIngredientVariations);
 
         StringBuilder sql = new StringBuilder("SELECT fdc_id, name FROM ingredients WHERE ");
         List<String> conditions = new ArrayList<>();
@@ -143,6 +144,8 @@ public class IngredientMatchService {
 
         sql.append(String.join(" OR ", conditions));
 
+        logger.info("In reduceCandidates, sql is {}", sql);
+        logger.info("In reduced candidates, params is {}", params);
         return jdbcTemplate.queryForList(sql.toString(), params.toArray());
     }
 
@@ -228,6 +231,7 @@ public class IngredientMatchService {
             // Score is count of number of tokens, where qualifiers count as 0.5.
             double maxTokenCount = max(calculateTokenSum(searchTokens),
                                        calculateTokenSum(dbCandidateTokens));
+            logger.info("maxTokenCount is {}", maxTokenCount);
             double normalizedScore = totalScore / maxTokenCount;
             logger.info("normalizedScore is {}", normalizedScore);
             IngredientMatchModel match = new IngredientMatchModel();
