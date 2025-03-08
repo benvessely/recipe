@@ -71,7 +71,7 @@ public class DataLoaderService {
             while ((row = reader.readNext()) != null) {
                 rowNum += 1;
                 int fdcId = Integer.parseInt(row[0]);
-                String name = row[2];
+                String name = row[2].replace("(Includes foods for USDA's Food Distribution Program)", "").trim();
                 int categoryId = Integer.parseInt(row[3]);
 
                 String sql = """
