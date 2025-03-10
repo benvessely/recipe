@@ -232,8 +232,7 @@ public class IngredientMatchService {
                 }
                 // If the searchToken matched pretty well with one of the dbTokens, it
                 // contributes positively to the score.
-                // TODO Update this value and use geq
-                if (bestMatchScore > 0.8) {
+                if (bestMatchScore >= 0.7) {
                     totalScore += bestMatchScore * tokenWeight;
                     logger.info("bestMatchScore is {} for searchToken {}, setting total score " +
                                     "to {}", bestMatchScore, searchToken, totalScore);
