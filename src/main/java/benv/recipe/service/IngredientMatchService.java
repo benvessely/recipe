@@ -238,12 +238,16 @@ public class IngredientMatchService {
                                     "to {}", bestMatchScore, searchToken, totalScore);
                 }
             }
+
+
             // Score is count of number of tokens, where qualifiers count as 0.5.
             double maxTokenCount = max(calculateTokenSum(searchTokens),
                                        calculateTokenSum(dbCandidateTokens));
             logger.info("maxTokenCount is {}", maxTokenCount);
             double normalizedScore = totalScore / maxTokenCount;
-            logger.info("normalizedScore is {}", normalizedScore);
+            if (normalizedScore > 0) {
+                normalizedScore = modifyScore(normalizedScore, searchTokens, dbCandidateTokens);
+            }
             IngredientMatchModel match = new IngredientMatchModel();
             match.setFdcId(fdcId);
             match.setName(name);
@@ -365,4 +369,50 @@ public class IngredientMatchService {
         return score;
     }
 
+    /**
+     * This function adds weight to database candidates that are in unprocessed form, and
+     * removes weight for processed forms _if_ the user isn't searching for a processed form.
+     *
+     */
+    private double modifyScore(double normalizedScore, List<String> searchTokens,
+                               List<String> dbCandidateTokens) {
+        Set<String> rawIndicators = new HashSet<>(Arrays.asList(
+                "raw", "fresh", "whole", "unprepared"
+        ));
+        Set<String> processedForms = new HashSet<>(Arrays.asList(
+                "flour", "powder", "extract", "juice", "chips", "sauce", "oil",
+                "frozen", "canned", "dried", "salted", "pickled", "dressing"
+        ));
+        double modifiedScore = normalizedScore;
+        logger.info("modifiedScore = normalizedScore = {} at start of modifyScore", modifiedScore);
+        for (String token: dbCandidateTokens) {
+            if (rawIndicators.contains(token)) {
+                modifiedScore += 0.25;
+                logger.info("Token {} boosts score to {}", token, modifiedScore);
+                break;
+            }
+        }
+
+        boolean isProcessedForm = false;
+        for (String token : dbCandidateTokens) {
+            if (processedForms.contains(token)) {
+
+                boolean inSearchTerm = false;
+                for (String searchToken : searchTokens) {
+                    if (processedForms.contains(searchToken)) {
+                        inSearchTerm = true;
+                        break;
+                    }
+                }
+
+                if (!inSearchTerm) {
+                    modifiedScore -= 0.25;
+                    logger.info("Token {} reduces score to {}", token, modifiedScore);
+                }
+            }
+        }
+
+        // Make sure score stays between 0 and 1
+        return Math.min(1.0, Math.max(0, modifiedScore));
+    }
 }
