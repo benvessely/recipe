@@ -379,38 +379,49 @@ public class IngredientMatchService {
         Set<String> rawIndicators = new HashSet<>(Arrays.asList(
                 "raw", "fresh", "whole", "unprepared"
         ));
-        Set<String> processedForms = new HashSet<>(Arrays.asList(
+        Set<String> processedIndicators = new HashSet<>(Arrays.asList(
                 "flour", "powder", "extract", "juice", "chips", "sauce", "oil",
-                "frozen", "canned", "dried", "salted", "pickled", "dressing"
+                "frozen", "canned", "dried", "salted", "pickled", "dressing", "puree"
         ));
         double modifiedScore = normalizedScore;
         logger.info("modifiedScore = normalizedScore = {} at start of modifyScore", modifiedScore);
-        for (String token: dbCandidateTokens) {
-            if (rawIndicators.contains(token)) {
-                modifiedScore += 0.25;
-                logger.info("Token {} boosts score to {}", token, modifiedScore);
+       
+        
+        // Determine if there's a token from processedIndicators in the searchTerm
+        boolean processedInSearchTerm = false;
+        for (String searchToken : searchTokens) {
+            if (processedIndicators.contains(searchToken)) {
+                processedInSearchTerm = true;
                 break;
             }
         }
 
-        boolean isProcessedForm = false;
-        for (String token : dbCandidateTokens) {
-            if (processedForms.contains(token)) {
 
-                boolean inSearchTerm = false;
-                for (String searchToken : searchTokens) {
-                    if (processedForms.contains(searchToken)) {
-                        inSearchTerm = true;
-                        break;
-                    }
+        for (String dbToken: dbCandidateTokens) {
+            // If the db term is a raw item
+            if (rawIndicators.contains(dbToken)) {
+                // And we aren't searching for a processed item, boost the score
+                if (!processedInSearchTerm) {
+                    modifiedScore += 0.25;
+                    logger.info("Token {} boosts score to {}", dbToken, modifiedScore);
                 }
+                break;
+            }
+        }
 
-                if (!inSearchTerm) {
+        boolean containsProcessedIndicator = false;
+        for (String token : dbCandidateTokens) {
+            // If the db term is a processed item
+            if (processedIndicators.contains(token)) {
+                // Unless we're looking for a processed item, subtract from score
+                if (!processedInSearchTerm) {
                     modifiedScore -= 0.25;
                     logger.info("Token {} reduces score to {}", token, modifiedScore);
                 }
+                break;
             }
         }
+        
 
         // Make sure score stays between 0 and 1
         return Math.min(1.0, Math.max(0, modifiedScore));
