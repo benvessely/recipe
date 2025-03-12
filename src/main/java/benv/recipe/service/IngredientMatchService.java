@@ -15,7 +15,7 @@ import static java.lang.Math.max;
 
 @Service
 public class IngredientMatchService {
-    int MATCH_COUNT = 20;
+    int MATCH_COUNT = 25;
     double STANDARD_WEIGHT = 1.0;
     double QUALIFIER_WEIGHT = 0.5;
     double COMMON_WORD_WEIGHT = 0.2;
@@ -25,7 +25,7 @@ public class IngredientMatchService {
             "cooked", "boiled", "roasted", "baked", "fried", "steamed", "sweet",
             "sour", "bitter", "spicy", "hot", "cold", "warm", "ripe", "unripe",
             "stemmed", "cored", "red", "orange", "yellow", "green", "blue", "purple",
-            "pink"
+            "pink", "white", "black", "brown", "gray"
     ));
     Set<String> grammar = new HashSet<>(Arrays.asList(
                 "a", "an", "the", "in", "on", "at", "by", "for", "with", "from", "of", "to",
