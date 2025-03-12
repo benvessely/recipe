@@ -381,7 +381,8 @@ public class IngredientMatchService {
         ));
         Set<String> processedIndicators = new HashSet<>(Arrays.asList(
                 "flour", "powder", "extract", "juice", "chips", "sauce", "oil",
-                "frozen", "canned", "dried", "salted", "pickled", "dressing", "puree"
+                "frozen", "canned", "dried", "salted", "pickled", "dressing", "puree",
+                "paste"
         ));
         double modifiedScore = normalizedScore;
         logger.info("modifiedScore = normalizedScore = {} at start of modifyScore", modifiedScore);
@@ -402,7 +403,7 @@ public class IngredientMatchService {
             if (rawIndicators.contains(dbToken)) {
                 // And we aren't searching for a processed item, boost the score
                 if (!processedInSearchTerm) {
-                    modifiedScore += 0.25;
+                    modifiedScore += 0.15;
                     logger.info("Token {} boosts score to {}", dbToken, modifiedScore);
                 }
                 break;
@@ -415,7 +416,7 @@ public class IngredientMatchService {
             if (processedIndicators.contains(token)) {
                 // Unless we're looking for a processed item, subtract from score
                 if (!processedInSearchTerm) {
-                    modifiedScore -= 0.25;
+                    modifiedScore -= 0.15;
                     logger.info("Token {} reduces score to {}", token, modifiedScore);
                 }
                 break;
