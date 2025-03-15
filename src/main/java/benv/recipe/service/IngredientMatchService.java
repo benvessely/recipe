@@ -15,7 +15,7 @@ import static java.lang.Math.max;
 
 @Service
 public class IngredientMatchService {
-    int MATCH_COUNT = 25;
+    int MATCH_COUNT = 20;
     double STANDARD_WEIGHT = 1.0;
     double QUALIFIER_WEIGHT = 0.5;
     double COMMON_WORD_WEIGHT = 0.2;
@@ -370,8 +370,8 @@ public class IngredientMatchService {
     }
 
     /**
-     * This function adds weight to database candidates that are in unprocessed form, and
-     * removes weight for processed forms _if_ the user isn't searching for a processed form.
+     * This function adds weight to database candidates that are in unprocessed form and
+     * removes weight for processed forms, _if_ the user isn't searching for a processed form.
      *
      */
     private double modifyScore(double normalizedScore, List<String> searchTokens,

@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 public class IngredientParserService {
     private static final Set<String> UNITS = new HashSet<>(Arrays.asList(
             "cup", "cups", "tablespoon", "tablespoons", "tbsp",
-            "teaspoon", "teaspoons", "tsp", "pound", "pounds", "lb",
+            "teaspoon", "teaspoons", "tsp", "pound", "pounds", "lb", "lbs",
             "ounce", "ounces", "oz", "gram", "grams", "g",
             "kilogram", "kg", "ml", "milliliter", "liter"
     ));
