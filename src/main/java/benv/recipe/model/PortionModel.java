@@ -3,9 +3,9 @@ package benv.recipe.model;
 public class PortionModel {
     private Integer id;
     private Integer fdcId;
-    private Double amount;
-    private String modifier;
-    private Double weight;
+    private Double unitAmount;
+    private String unit;
+    private Double weightPer100g;
 
     // Getters and setters
     public Integer getId() {
@@ -24,27 +24,27 @@ public class PortionModel {
         this.fdcId = fdcId;
     }
 
-    public Double getAmount() {
-        return amount;
+    public Double getUnitAmount() {
+        return unitAmount;
     }
 
-    public void setAmount(Double amount) {
-        this.amount = amount;
+    public void setUnitAmount(Double unitAmount) {
+        this.unitAmount = unitAmount;
     }
 
-    public String getModifier() {
-        return modifier;
+    public String getUnit() {
+        return unit;
     }
 
-    public void setModifier(String modifier) {
-        this.modifier = modifier;
+    public void setUnit(String unit) {
+        this.unit = unit;
     }
 
-    public Double getWeight() {
-        return weight;
+    public Double getWeightPer100g() {
+        return weightPer100g;
     }
 
-    public void setWeight(Double weight) {
-        this.weight = weight;
+    public void setWeightPer100g(Double weightPer100g) {
+        this.weightPer100g = weightPer100g;
     }
 }

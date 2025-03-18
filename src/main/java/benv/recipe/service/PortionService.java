@@ -23,9 +23,9 @@ public class PortionService {
             PortionModel portion = new PortionModel();
             portion.setId(rs.getInt("id"));
             portion.setFdcId(rs.getInt("fdc_id"));
-            portion.setAmount(rs.getDouble("amount"));
-            portion.setModifier(rs.getString("modifier"));
-            portion.setWeight(rs.getDouble("gram_weight"));
+            portion.setUnitAmount(rs.getDouble("amount"));
+            portion.setUnit(rs.getString("modifier"));
+            portion.setWeightPer100g(rs.getDouble("weight"));
             return portion;
         }
     }
