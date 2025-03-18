@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS ingredients (
 
 CREATE TABLE IF NOT EXISTS portions (
     id SERIAL PRIMARY KEY,
+    portion_id INTEGER NOT NULL,
     fdc_id INTEGER NOT NULL,
     amount DECIMAL,
     modifier VARCHAR(255) NOT NULL,

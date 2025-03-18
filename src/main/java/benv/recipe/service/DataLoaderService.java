@@ -148,15 +148,16 @@ public class DataLoaderService {
             String[] row;
 
             while ((row = reader.readNext()) != null) {
+                Integer portionId = Integer.parseInt(row[0]);
                 Integer fdcId = Integer.parseInt(row[1]);
                 Double amount = Double.parseDouble(row[3]);
                 String modifier = row[6];
                 Double weight = Double.parseDouble(row[7]);
 
                 jdbcTemplate.update(
-                        "INSERT INTO portions(fdc_id, amount, modifier, weight) " +
-                                "VALUES (?, ?, ?, ?)",
-                        fdcId, amount, modifier, weight
+                        "INSERT INTO portions(portion_id, fdc_id, amount, " +
+                                "modifier, weight) VALUES (?, ?, ?, ?, ?)",
+                        portionId, fdcId, amount, modifier, weight
                 );
             }
         } catch (IOException e) {
