@@ -1,13 +1,7 @@
 package benv.recipe.controller;
 
-import benv.recipe.model.IngredientMatchModel;
-import benv.recipe.model.IngredientModel;
-import benv.recipe.model.PortionModel;
-import benv.recipe.model.RecipeModel;
-import benv.recipe.service.IngredientParserService;
-import benv.recipe.service.IngredientMatchService;
-import benv.recipe.service.PortionService;
-import benv.recipe.service.RecipeService;
+import benv.recipe.model.*;
+import benv.recipe.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +19,7 @@ public class NutritionController {
     private final RecipeService recipeService;
     private final IngredientMatchService ingredientMatchService;
     private final PortionService portionService;
+    private final NutritionService nutritionService;
 
     private static final Logger logger = LoggerFactory.getLogger(NutritionController.class);
 
@@ -32,11 +27,13 @@ public class NutritionController {
     public NutritionController(IngredientParserService ingredientParserService,
                                 RecipeService recipeService,
                                 IngredientMatchService ingredientMatchService,
-                                PortionService portionService) {
+                                PortionService portionService,
+                                NutritionService nutritionService) {
         this.ingredientParserService = ingredientParserService;
         this.recipeService = recipeService;
         this.ingredientMatchService = ingredientMatchService;
         this.portionService = portionService;
+        this.nutritionService = nutritionService;
     }
 
     @GetMapping("/{id}/ingredient-matches")
@@ -50,5 +47,12 @@ public class NutritionController {
             @RequestParam List<Integer> fdcIds) {
         Map<String, List<PortionModel>> portions = portionService.getPortions(fdcIds);
         return ResponseEntity.ok(portions);
+    }
+
+    @PutMapping("/calculate-nutrition")
+    public ResponseEntity<RecipeNutritionModel> calculateNutrition(
+            @RequestBody List<IngredientSelectionModel> selections) {
+
+        RecipeNutritionModel nutrition = nutritionService.calculateNutrition(selections);
     }
 }
