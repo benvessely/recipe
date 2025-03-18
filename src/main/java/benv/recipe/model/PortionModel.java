@@ -1,19 +1,19 @@
 package benv.recipe.model;
 
 public class PortionModel {
-    private Integer id;
+    private Integer portionId;
     private Integer fdcId;
     private Double unitAmount;
     private String unit;
     private Double weightPer100g;
 
     // Getters and setters
-    public Integer getId() {
-        return id;
+    public Integer getPortionId() {
+        return portionId;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setId(Integer portionId) {
+        this.portionId = portionId;
     }
 
     public Integer getFdcId() {

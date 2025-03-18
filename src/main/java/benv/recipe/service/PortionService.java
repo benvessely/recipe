@@ -1,6 +1,9 @@
 package benv.recipe.service;
 
+import benv.recipe.controller.RecipeController;
 import benv.recipe.model.PortionModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -16,6 +19,7 @@ import java.util.stream.Collectors;
 @Service
 public class PortionService {
     private final JdbcTemplate jdbcTemplate;
+    private static final Logger logger = LoggerFactory.getLogger(PortionService.class);
 
     private static class PortionRowMapper implements RowMapper<PortionModel> {
         @Override
