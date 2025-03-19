@@ -54,5 +54,7 @@ public class NutritionController {
             @RequestBody List<IngredientSelectionModel> selections) {
 
         RecipeNutritionModel nutrition = nutritionService.calculateNutrition(selections);
+
+        return ResponseEntity.ok(nutrition);
     }
 }

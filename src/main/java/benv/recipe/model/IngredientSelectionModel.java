@@ -4,6 +4,7 @@ public class IngredientSelectionModel {
     private Integer portionId;
     private Integer fdcId;
     private Double quantity;
+    private String unit;
 
     public Integer getPortionId() {
         return portionId;
@@ -28,4 +29,13 @@ public class IngredientSelectionModel {
     public void setQuantity (Double quantity) {
         this.quantity = quantity;
     }
+
+    public String getUnit() {
+        return unit;
+    }
+
+    public void setUnit(String unit) {
+        this.unit = unit;
+    }
 }
+
