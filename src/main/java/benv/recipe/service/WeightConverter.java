@@ -1,5 +1,9 @@
 package benv.recipe.service;
 
+import benv.recipe.model.IngredientSelectionModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -9,6 +13,8 @@ import java.util.regex.Pattern;
 
 @Service
 public class WeightConverter {
+    private final JdbcTemplate jdbcTemplate;
+    private static final Logger logger = LoggerFactory.getLogger(IngredientMatchService.class);
 
     // Written so that one unit of the {key} is {value} number of grams
     static Map<String, Double> gramsPerUnits = new HashMap<>();
@@ -33,20 +39,38 @@ public class WeightConverter {
         gramsPerUnits.put("kilograms", 1000.0);
     }
 
+    public WeightConverter(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
     private static final Pattern WEIGHT_PATTERN =
             Pattern.compile("(g|gram|grams|oz|ounce|ounces|lb|lbs|pound|pounds|kg|kilogram|kilograms)");
 
-    public Double convertToGrams(Double quantity, String unit) {
-        Matcher matcher = WEIGHT_PATTERN.matcher(unit);
-        if (!matcher.matches()) {
-            throw new IllegalArgumentException("Invalid weight format: " + unit);
+    public Double convertToGrams(IngredientSelectionModel selection) {
+        String unit = selection.getUnit().trim();
+
+        // If the selection object has no portion ID, the unit must be a weight
+        if (selection.getPortionId() == null) {
+            Matcher matcher = WEIGHT_PATTERN.matcher(unit);
+            if (!matcher.matches()) {
+                throw new IllegalArgumentException("Invalid weight format: " + unit);
+            }
+
+            Double gramsPerUnit = gramsPerUnits.get(unit);
+            Double gramsQuantity = selection.getQuantity() * gramsPerUnit;
+            logger.info("Weight given, converted to {} grams", gramsQuantity);
+
+            return gramsQuantity;
+        } else {
+            double gramsPerPortion = jdbcTemplate.queryForObject(
+                    "SELECT name FROM my_table WHERE portion_id = ?",
+                    Double.class,
+                    selection.getPortionId()
+            );
+            double gramsTotal = gramsPerPortion * selection.getQuantity();
+            return gramsTotal;
         }
 
-        Double gramsPerUnit = gramsPerUnits.get(unit);
-        Double gramsQuantity = quantity * gramsPerUnit;
-
-        return gramsQuantity;
     }
-
 
 }

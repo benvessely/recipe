@@ -31,13 +31,7 @@ public class NutritionService {
         RecipeNutritionModel nutrition = new RecipeNutritionModel();
 
         for (IngredientSelectionModel selection : selections) {
-            Double weightGrams;
-            String unit = selection.getUnit().trim();
-            Double quantity = selection.getQuantity();
-            if (selection.getPortionId() == null) {
-                weightGrams = weightConverter.convertToGrams(quantity, unit);
-                logger.info("Weight given, converted to {} grams", weightGrams);
-            }
+            Double weightGrams = weightConverter.convertToGrams(selection);
 
         }
         return nutrition;
