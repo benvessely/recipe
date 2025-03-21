@@ -63,7 +63,7 @@ public class WeightConverter {
             return gramsQuantity;
         } else {
             double gramsPerPortion = jdbcTemplate.queryForObject(
-                    "SELECT weight FROM my_table WHERE portion_id = ?",
+                    "SELECT weight FROM portions WHERE portion_id = ?",
                     Double.class,
                     selection.getPortionId()
             );
