@@ -6,8 +6,8 @@ import benv.recipe.model.NutritionValuesModel;
 public class RecipeNutritionModel {
     private List<IngredientMatchModel> ingredients;
     private Integer servings;
-    private NutritionValuesModel totalNutrients;
-    private NutritionValuesModel perServingNutrients;
+    private NutritionValuesModel totalNutrition;
+    private NutritionValuesModel perServingNutrition;
 
     public List<IngredientMatchModel> getIngredients() {
         return ingredients;
@@ -17,12 +17,12 @@ public class RecipeNutritionModel {
         return servings;
     }
 
-    public NutritionValuesModel getTotalNutrients() {
-        return totalNutrients;
+    public NutritionValuesModel getTotalNutrition() {
+        return totalNutrition;
     }
 
-    public NutritionValuesModel getPerServingNutrients() {
-        return perServingNutrients;
+    public NutritionValuesModel getPerServingNutrition() {
+        return perServingNutrition;
     }
 
     public void setIngredients(List<IngredientMatchModel> ingredients) {
@@ -33,11 +33,11 @@ public class RecipeNutritionModel {
         this.servings = servings;
     }
 
-    public void setTotalNutrients(NutritionValuesModel totalNutrients) {
-        this.totalNutrients = totalNutrients;
+    public void setTotalNutrition(NutritionValuesModel totalNutrition) {
+        this.totalNutrition = totalNutrition;
     }
 
-    public void setPerServingNutrients(NutritionValuesModel perServingNutrients) {
-        this.perServingNutrients = perServingNutrients;
+    public void setPerServingNutrition(NutritionValuesModel perServingNutrition) {
+        this.perServingNutrition = perServingNutrition;
     }
 }

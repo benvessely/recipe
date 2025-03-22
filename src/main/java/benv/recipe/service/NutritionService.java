@@ -32,19 +32,20 @@ public class NutritionService {
     public RecipeNutritionModel calculateNutrition(List<IngredientSelectionModel> selections) {
         RecipeNutritionModel nutrition = new RecipeNutritionModel();
 
-        NutritionValuesModel totalNutrients = new NutritionValuesModel();
-        totalNutrients.setCalories(0.0);
-        totalNutrients.setProtein(0.0);
-        totalNutrients.setFat(0.0);
-        totalNutrients.setCarbs(0.0);
-        totalNutrients.setFiber(0.0);
-        totalNutrients.setTotalSugar(0.0);
-        totalNutrients.setSatFat(0.0);
-        totalNutrients.setCholesterol(0.0);
-        totalNutrients.setSodium(0.0);
+        NutritionValuesModel totalNutrition = new NutritionValuesModel();
+        totalNutrition.setCalories(0.0);
+        totalNutrition.setProtein(0.0);
+        totalNutrition.setFat(0.0);
+        totalNutrition.setCarbs(0.0);
+        totalNutrition.setFiber(0.0);
+        totalNutrition.setTotalSugar(0.0);
+        totalNutrition.setSatFat(0.0);
+        totalNutrition.setCholesterol(0.0);
+        totalNutrition.setSodium(0.0);
 
         for (IngredientSelectionModel selection : selections) {
             Double weightGrams = weightConverter.convertToGrams(selection);
+            logger.info("weightGrams is {}", weightGrams);
 
             // Query the database for nutrition data for this ingredient
             String sql = """
@@ -69,52 +70,52 @@ public class NutritionService {
             if (calories_per_100g != null) {
                 // Nutrient amount total Units = weight g * \left( \frac{nutrient amount Units}{100 g} \right)
                 Double amountNew = weightGrams / 100.0  * ((Number) calories_per_100g).doubleValue();
-                totalNutrients.setCalories(totalNutrients.getCalories() + amountNew);
-                logger.info("Added calories, totalNutrients.getCalories is now {}", totalNutrients.getCalories());
+                totalNutrition.setCalories(totalNutrition.getCalories() + amountNew);
+                logger.info("Added calories, totalNutrition.getCalories is now {}", totalNutrition.getCalories());
             }
             Object protein_per_100g = nutritionData.get("protein_per_100g");
             if (protein_per_100g != null) {
                 Double amountNew = weightGrams / 100.0  * ((Number) protein_per_100g).doubleValue();
-                totalNutrients.setProtein(totalNutrients.getProtein() + amountNew);
+                totalNutrition.setProtein(totalNutrition.getProtein() + amountNew);
             }
             Object fat_per_100g = nutritionData.get("fat_per_100g");
             if (fat_per_100g != null) {
                 Double amountNew = weightGrams / 100.0  * ((Number) fat_per_100g).doubleValue();
-                totalNutrients.setFat(totalNutrients.getFat() + amountNew);
+                totalNutrition.setFat(totalNutrition.getFat() + amountNew);
             }
             Object carbs_per_100g = nutritionData.get("carbs_per_100g");
             if (carbs_per_100g != null) {
                 Double amountNew = weightGrams / 100.0  * ((Number) carbs_per_100g).doubleValue();
-                totalNutrients.setCarbs(totalNutrients.getCarbs() + amountNew);
+                totalNutrition.setCarbs(totalNutrition.getCarbs() + amountNew);
             }
             Object fiber_per_100g = nutritionData.get("fiber_per_100g");
             if (fiber_per_100g != null) {
                 Double amountNew = weightGrams / 100.0  * ((Number) fiber_per_100g).doubleValue();
-                totalNutrients.setFiber(totalNutrients.getFiber() + amountNew);
+                totalNutrition.setFiber(totalNutrition.getFiber() + amountNew);
             }
             Object total_sugar_per_100g = nutritionData.get("total_sugar_per_100g");
             if (total_sugar_per_100g != null) {
                 Double amountNew = weightGrams / 100.0  * ((Number) total_sugar_per_100g).doubleValue();
-                totalNutrients.setTotalSugar(totalNutrients.getTotalSugar() + amountNew);
+                totalNutrition.setTotalSugar(totalNutrition.getTotalSugar() + amountNew);
             }
             Object sat_fat_per_100g = nutritionData.get("sat_fat_per_100g");
             if (sat_fat_per_100g != null) {
                 Double amountNew = weightGrams / 100.0  * ((Number) sat_fat_per_100g).doubleValue();
-                totalNutrients.setSatFat(totalNutrients.getSatFat() + amountNew);
+                totalNutrition.setSatFat(totalNutrition.getSatFat() + amountNew);
             }
             Object cholesterol_per_100g = nutritionData.get("cholesterol_per_100g");
             if (cholesterol_per_100g != null) {
                 Double amountNew = weightGrams / 100.0  * ((Number) cholesterol_per_100g).doubleValue();
-                totalNutrients.setCholesterol(totalNutrients.getCholesterol() + amountNew);
+                totalNutrition.setCholesterol(totalNutrition.getCholesterol() + amountNew);
             }
             Object sodium_per_100g = nutritionData.get("sodium_per_100g");
             if (sodium_per_100g != null) {
                 Double amountNew = weightGrams / 100.0  * ((Number) sodium_per_100g).doubleValue();
-                totalNutrients.setSodium(totalNutrients.getSodium() + amountNew);
+                totalNutrition.setSodium(totalNutrition.getSodium() + amountNew);
             }
 
         }
-        nutrition.setTotalNutrients(totalNutrients);
+        nutrition.setTotalNutrition(totalNutrition);
         return nutrition;
     }
 }
