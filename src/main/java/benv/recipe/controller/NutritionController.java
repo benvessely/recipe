@@ -49,10 +49,18 @@ public class NutritionController {
         return ResponseEntity.ok(portions);
     }
 
+    // Returns ResponseEntity<RecipeNutritionModel> if inputs are valid, otherwise
+    // returns ResponseEntity<String>
     @PutMapping("/calculate-nutrition")
-    public ResponseEntity<RecipeNutritionModel> calculateNutrition(
+    public ResponseEntity<?> calculateNutrition(
             @RequestBody List<IngredientSelectionModel> selections) {
 
+        for (IngredientSelectionModel selection : selections) {
+            if (selection.getQuantity() < 0) {
+                logger.info("Returning 400 error, quantity for ingredients cannot be negative");
+                return ResponseEntity.badRequest().body("Quantity for ingredients cannot be negative.");
+            }
+        }
         RecipeNutritionModel nutrition = nutritionService.calculateNutrition(selections);
 
         return ResponseEntity.ok(nutrition);
