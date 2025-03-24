@@ -68,7 +68,7 @@ public class NutritionService {
 
             Object calories_per_100g = nutritionData.get("calories_per_100g");
             if (calories_per_100g != null) {
-                // Nutrient amount total Units = weight g * \left( \frac{nutrient amount Units}{100 g} \right)
+                // Nutrient amount total in Units = weight g * \left( \frac{nutrient amount in Units}{100 g} \right)
                 Double amountNew = weightGrams / 100.0  * ((Number) calories_per_100g).doubleValue();
                 totalNutrition.setCalories(totalNutrition.getCalories() + amountNew);
                 logger.info("Added calories, totalNutrition.getCalories is now {}", totalNutrition.getCalories());

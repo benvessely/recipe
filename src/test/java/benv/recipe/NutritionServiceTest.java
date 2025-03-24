@@ -41,7 +41,7 @@ public class NutritionServiceTest {
     }
 
     @Test
-    public void testOneThing() {
+    public void testSingle() {
         IngredientSelectionModel frankfurter = new IngredientSelectionModel();
         frankfurter.setPortionId(81778);
         frankfurter.setFdcId(167696);
