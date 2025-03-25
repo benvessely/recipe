@@ -33,6 +33,8 @@ public class NutritionService {
                                                    Integer servings) {
         RecipeNutritionModel nutrition = new RecipeNutritionModel();
 
+        nutrition.setSelections(selections);
+
         NutritionValuesModel totalNutrition = new NutritionValuesModel();
         totalNutrition.setCalories(0.0);
         totalNutrition.setProtein(0.0);
@@ -48,7 +50,6 @@ public class NutritionService {
             Double weightGrams = weightConverter.convertToGrams(selection);
             logger.info("weightGrams is {}", weightGrams);
 
-            // Query the database for nutrition data for this ingredient
             String sql = """
                 SELECT 
                     name,

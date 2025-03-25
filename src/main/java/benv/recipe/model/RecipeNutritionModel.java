@@ -4,13 +4,13 @@ import java.util.List;
 import benv.recipe.model.NutritionValuesModel;
 
 public class RecipeNutritionModel {
-    private List<IngredientMatchModel> ingredients;
+    private List<IngredientSelectionModel> selections;
     private Integer servings;
     private NutritionValuesModel totalNutrition;
     private NutritionValuesModel perServingNutrition;
 
-    public List<IngredientMatchModel> getIngredients() {
-        return ingredients;
+    public List<IngredientSelectionModel> getSelections() {
+        return selections;
     }
 
     public Integer getServings() {
@@ -25,8 +25,8 @@ public class RecipeNutritionModel {
         return perServingNutrition;
     }
 
-    public void setIngredients(List<IngredientMatchModel> ingredients) {
-        this.ingredients = ingredients;
+    public void setSelections(List<IngredientSelectionModel> selections) {
+        this.selections = selections;
     }
 
     public void setServings(Integer servings) {
