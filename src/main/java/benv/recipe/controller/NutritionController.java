@@ -53,7 +53,9 @@ public class NutritionController {
     // returns ResponseEntity<String>
     @PutMapping("/calculate-nutrition")
     public ResponseEntity<?> calculateNutrition(
-            @RequestBody List<IngredientSelectionModel> selections) {
+            @RequestBody List<IngredientSelectionModel> selections,
+            @RequestParam(required=false) Integer servings)  {
+        logger.info("Serving count is {}", servings);
 
         for (IngredientSelectionModel selection : selections) {
             if (selection.getQuantity() < 0) {
@@ -61,7 +63,7 @@ public class NutritionController {
                 return ResponseEntity.badRequest().body("Quantity for ingredients cannot be negative.");
             }
         }
-        RecipeNutritionModel nutrition = nutritionService.calculateNutrition(selections);
+        RecipeNutritionModel nutrition = nutritionService.calculateNutrition(selections, servings);
 
         return ResponseEntity.ok(nutrition);
     }

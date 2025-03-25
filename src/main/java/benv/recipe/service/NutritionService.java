@@ -29,7 +29,8 @@ public class NutritionService {
     }
 
 
-    public RecipeNutritionModel calculateNutrition(List<IngredientSelectionModel> selections) {
+    public RecipeNutritionModel calculateNutrition(List<IngredientSelectionModel> selections,
+                                                   Integer servings) {
         RecipeNutritionModel nutrition = new RecipeNutritionModel();
 
         NutritionValuesModel totalNutrition = new NutritionValuesModel();
@@ -116,6 +117,24 @@ public class NutritionService {
 
         }
         nutrition.setTotalNutrition(totalNutrition);
+
+        if (servings != null) {
+            nutrition.setServings(servings);
+
+            NutritionValuesModel perServingNutrition = new NutritionValuesModel();
+            perServingNutrition.setCalories(totalNutrition.getCalories() / servings);
+            perServingNutrition.setProtein(totalNutrition.getProtein() / servings);
+            perServingNutrition.setFat(totalNutrition.getFat() / servings);
+            perServingNutrition.setCarbs(totalNutrition.getCarbs() / servings);
+            perServingNutrition.setFiber(totalNutrition.getFiber() / servings);
+            perServingNutrition.setTotalSugar(totalNutrition.getTotalSugar() / servings);
+            perServingNutrition.setSatFat(totalNutrition.getSatFat() / servings);
+            perServingNutrition.setCholesterol(totalNutrition.getCholesterol() / servings);
+            perServingNutrition.setSodium(totalNutrition.getSodium() / servings);
+
+            nutrition.setPerServingNutrition(perServingNutrition);
+        }
+
         return nutrition;
     }
 }

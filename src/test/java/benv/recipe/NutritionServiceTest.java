@@ -65,7 +65,7 @@ public class NutritionServiceTest {
 
         when(jdbcTemplate.queryForMap(anyString(), anyInt())).thenReturn(nutritionData);
 
-        RecipeNutritionModel bigNutritionObject = nutritionService.calculateNutrition(input);
+        RecipeNutritionModel bigNutritionObject = nutritionService.calculateNutrition(input, 4);
         NutritionValuesModel totalNutrition = bigNutritionObject.getTotalNutrition();
         logger.info("totalNutrition is {}", totalNutrition);
 
