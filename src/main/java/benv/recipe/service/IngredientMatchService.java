@@ -174,6 +174,7 @@ public class IngredientMatchService {
         }
 
         for (Map<String, Object> dbCandidate : dbCandidates) {
+            logger.info("");
             logger.info("dbCandidate is {}", dbCandidate);
             Integer fdcId = (Integer) dbCandidate.get("fdc_id");
             String name = (String) dbCandidate.get("name");
@@ -223,8 +224,6 @@ public class IngredientMatchService {
                         // logger.info("dbToken is {} in Levenshtein loop", dbToken);
                         if (searchToken.length() >= 3 && dbToken.length() >= 3) {
                             double similarity = normalizedLevSimilarity(searchToken, dbToken);
-                            logger.info("Similarity score for search token {} and db " +
-                                     "token {} is {}", searchToken, dbToken, similarity);
                             bestMatchScore = max(bestMatchScore, similarity);
 
                         }
@@ -234,16 +233,12 @@ public class IngredientMatchService {
                 // contributes positively to the score.
                 if (bestMatchScore >= 0.7) {
                     totalScore += bestMatchScore * tokenWeight;
-                    logger.info("bestMatchScore is {} for searchToken {}, setting total score " +
-                                    "to {}", bestMatchScore, searchToken, totalScore);
                 }
             }
-
 
             // Score is count of number of tokens, where qualifiers count as 0.5.
             double maxTokenCount = max(calculateTokenSum(searchTokens),
                                        calculateTokenSum(dbCandidateTokens));
-            logger.info("maxTokenCount is {}", maxTokenCount);
             double normalizedScore = totalScore / maxTokenCount;
             if (normalizedScore > 0) {
                 normalizedScore = modifyScore(normalizedScore, searchTokens, dbCandidateTokens);
@@ -302,11 +297,6 @@ public class IngredientMatchService {
                         item.getName());
             }
         }
-
-        System.out.println("\nQueue contents using enhanced for-loop:");
-        for (IngredientMatchModel element : matchQueue) {
-            System.out.println("- " + element.getName());
-        }
     }
 
 
@@ -351,9 +341,7 @@ public class IngredientMatchService {
         double score = 0.0;
         logger.info("tokenList is {}", tokenList);
         for (String term : tokenList) {
-            logger.info("Token sum is {}, term is {}", score, term);
             if (grammar.contains(term)) {
-                logger.info("Found grammar word {}", term);
                 continue;
             }
             else if (commonWords.contains(term) ) {
