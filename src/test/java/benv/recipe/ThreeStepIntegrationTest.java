@@ -14,6 +14,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -86,6 +87,7 @@ public class ThreeStepIntegrationTest {
         // Step 3: Calculate nutrition
 
         List<IngredientSelectionModel> selections = createSelections(portions);
+
     }
 
 
@@ -95,10 +97,15 @@ public class ThreeStepIntegrationTest {
 
         List<IngredientSelectionModel> selections = new ArrayList<>();
 
+        RecipeModel recipe = recipeRepository.getRecipeById(recipeId);
+        String recipeIngredients = recipe.getIngredients();
+
+
+
         for (List<PortionModel> portionList : portions.values()) {
             IngredientSelectionModel selection = new IngredientSelectionModel();
 
-
+            Matcher matcher = WEIGHT_PATTERN.matcher(unit);
         }
     }
 
