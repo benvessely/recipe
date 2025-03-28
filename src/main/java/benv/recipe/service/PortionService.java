@@ -41,15 +41,12 @@ public class PortionService {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public Map<String, List<PortionModel>> getPortions(List<Integer> fdcIds) {
-        Map<String, List<PortionModel>> portionMap = new HashMap<>();
-
-        Map<Integer, String> ingredientNames = getIngredientNames(fdcIds);
+    public Map<Integer, List<PortionModel>> getPortions(List<Integer> fdcIds) {
+        Map<Integer, List<PortionModel>> portionMap = new HashMap<>();
 
         for (Integer fdcId : fdcIds) {
-            String ingredientName = ingredientNames.get(fdcId);
             List<PortionModel> portionsList = getPortionsByFdcId(fdcId);
-            portionMap.put(ingredientName, portionsList);
+            portionMap.put(fdcId, portionsList);
         }
 
         return portionMap;

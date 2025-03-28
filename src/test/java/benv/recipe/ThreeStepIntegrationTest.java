@@ -2,10 +2,13 @@ package benv.recipe;
 
 import benv.recipe.model.*;
 import benv.recipe.repository.RecipeRepository;
+import benv.recipe.service.IngredientMatchService;
 import benv.recipe.service.IngredientParserService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -23,6 +26,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ThreeStepIntegrationTest {
+    private static final Logger logger = LoggerFactory.getLogger(IngredientMatchService.class);
+
     @Autowired
     private TestRestTemplate restTemplate;
 
@@ -78,33 +83,35 @@ public class ThreeStepIntegrationTest {
         }
         URI uri = builder.build().encode().toUri();
 
-        ResponseEntity<Map<String, List<PortionModel>>> portionsResponse =
+        ResponseEntity<Map<Integer, List<PortionModel>>> portionsResponse =
                 restTemplate.exchange(
                         uri,
                         HttpMethod.GET,
                         null,
-                        new ParameterizedTypeReference<Map<String, List<PortionModel>>>() {}
+                        new ParameterizedTypeReference<Map<Integer, List<PortionModel>>>() {}
                 );
 
         assertThat(portionsResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
-        Map<String, List<PortionModel>> portions = portionsResponse.getBody();
+        Map<Integer, List<PortionModel>> portions = portionsResponse.getBody();
+        logger.info("portionsResponse.getBody() is {}", portions);
         assertThat(portions).isNotNull();
 
         // Step 3: Calculate nutrition
 
         List<IngredientSelectionModel> selections = createSelections(portions, ingredientToIdMap);
-
+        logger.info("Portion selections are {}", selections);
     }
 
 
-    private List<IngredientSelectionModel> createSelections(Map<String, List<PortionModel>> portions,
+    private List<IngredientSelectionModel> createSelections(Map<Integer, List<PortionModel>> portions,
                                                             Map<String, Integer> ingredientToIdMap) {
+        logger.info("portions Map<String, List<PortionModel>> is {}", portions);
+
         Pattern WEIGHT_PATTERN =
                 Pattern.compile("(g|gram|grams|oz|ounce|ounces|lb|lbs|pound|pounds|kg|kilogram|kilograms)");
 
         List<IngredientSelectionModel> selections = new ArrayList<>();
 
-        Map<String, IngredientModel> parsedMap = new HashMap<>();
         RecipeModel recipe = recipeRepository.getRecipeById(recipeId);
 
         String[] ingredients = recipe.getIngredients().split("\n");
@@ -112,31 +119,32 @@ public class ThreeStepIntegrationTest {
         // when we are looping through the portions map by ingredient name below
         for (String ingredientLine : ingredients) {
             IngredientModel parsedIngredient = ingredientParserService.parse(ingredientLine);
-            parsedMap.put(parsedIngredient.getMainIngredient(), parsedIngredient);
-        }
-
-        for (String ingredientName : portions.keySet()) {
+            logger.info("parsedIngredient is {}", parsedIngredient);
             IngredientSelectionModel selection = new IngredientSelectionModel();
-            IngredientModel parsedIngredient = parsedMap.get(ingredientName);
+
 
             Matcher matcher = WEIGHT_PATTERN.matcher(parsedIngredient.getUnit());
 
+            Integer fdcId = ingredientToIdMap.get(parsedIngredient.getMainIngredient());
             // If the unit for this ingredient is already a weight
             if (matcher.matches()) {
+                logger.info("Unit was a weight");
                 selection.setPortionId(null);
-                Integer fdcId = ingredientToIdMap.get(ingredientName);
                 selection.setFdcId(fdcId);
                 selection.setQuantity(parsedIngredient.getAmount());
                 selection.setUnit(parsedIngredient.getUnit());
             } else {
                 // Else if ingredient unit is not a weight, choose the first portion size
                 // arbitrarily for testing simplicity
-                PortionModel zeroethPortion = portions.get(ingredientName).get(0);
+                logger.info("Unit was not a weight");
+                PortionModel zeroethPortion = portions.get(fdcId).get(0);
                 selection.setPortionId(zeroethPortion.getPortionId());
                 selection.setFdcId(zeroethPortion.getFdcId());
+                // Arbitrary quantity for testing simplicity
                 selection.setQuantity(1.0);
                 selection.setUnit(zeroethPortion.getUnit());
             }
+            logger.info("New selection is {}", selection);
             selections.add(selection);
         }
 

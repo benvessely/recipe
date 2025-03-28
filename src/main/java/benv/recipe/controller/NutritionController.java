@@ -43,9 +43,9 @@ public class NutritionController {
     }
 
     @GetMapping("/portions")
-    public ResponseEntity<Map<String,List<PortionModel>>> getPortionsForIngredients(
+    public ResponseEntity<Map<Integer,List<PortionModel>>> getPortionsForIngredients(
             @RequestParam List<Integer> fdcIds) {
-        Map<String, List<PortionModel>> portions = portionService.getPortions(fdcIds);
+        Map<Integer, List<PortionModel>> portions = portionService.getPortions(fdcIds);
         return ResponseEntity.ok(portions);
     }
 
