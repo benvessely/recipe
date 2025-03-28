@@ -99,7 +99,6 @@ public class ThreeStepIntegrationTest {
         // Step 3: Calculate nutrition
 
         List<IngredientSelectionModel> selections = createSelections(portions, ingredientToIdMap);
-        logger.info("Portion selections are {}", selections);
     }
 
 
@@ -122,18 +121,21 @@ public class ThreeStepIntegrationTest {
             logger.info("parsedIngredient is {}", parsedIngredient);
             IngredientSelectionModel selection = new IngredientSelectionModel();
 
-
-            Matcher matcher = WEIGHT_PATTERN.matcher(parsedIngredient.getUnit());
+            String originalUnit = parsedIngredient.getUnit();
+            Matcher matcher = null;
+            if (originalUnit != null) {
+                matcher = WEIGHT_PATTERN.matcher(parsedIngredient.getUnit());
+            }
 
             Integer fdcId = ingredientToIdMap.get(parsedIngredient.getMainIngredient());
             // If the unit for this ingredient is already a weight
-            if (matcher.matches()) {
+            if (matcher != null && matcher.matches()) {
                 logger.info("Unit was a weight");
                 selection.setPortionId(null);
                 selection.setFdcId(fdcId);
                 selection.setQuantity(parsedIngredient.getAmount());
                 selection.setUnit(parsedIngredient.getUnit());
-            } else {
+            } else if (matcher == null || !matcher.matches()) {
                 // Else if ingredient unit is not a weight, choose the first portion size
                 // arbitrarily for testing simplicity
                 logger.info("Unit was not a weight");
@@ -144,7 +146,7 @@ public class ThreeStepIntegrationTest {
                 selection.setQuantity(1.0);
                 selection.setUnit(zeroethPortion.getUnit());
             }
-            logger.info("New selection is {}", selection);
+            logger.info("New selection is {}", selection.toString());
             selections.add(selection);
         }
 
