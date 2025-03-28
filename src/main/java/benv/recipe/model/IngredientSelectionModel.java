@@ -37,5 +37,15 @@ public class IngredientSelectionModel {
     public void setUnit(String unit) {
         this.unit = unit;
     }
+
+    @Override
+    public String toString() {
+        return "IngredientSelectionModel{" +
+                "portionId=" + portionId +
+                ", fdcId=" + fdcId +
+                ", quantity=" + quantity +
+                ", unit='" + unit + '\'' +
+                '}';
+    }
 }
 
