@@ -99,13 +99,56 @@ public class ThreeStepIntegrationTest {
         // Step 3: Calculate nutrition
 
         List<IngredientSelectionModel> selections = createSelections(portions, ingredientToIdMap);
+
+        HttpEntity<List<IngredientSelectionModel>> requestEntity =
+                new HttpEntity<>(selections, new HttpHeaders());
+
+        ResponseEntity<RecipeNutritionModel> nutritionResponse =
+                restTemplate.exchange(
+                        "/api/recipes/calculate-nutrition?servings=4",
+                        HttpMethod.PUT,
+                        requestEntity,
+                        RecipeNutritionModel.class
+                );
+        assertThat(nutritionResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        RecipeNutritionModel nutrition = nutritionResponse.getBody();
+        assertThat(nutrition).isNotNull();
+
+        assertThat(nutrition.getServings()).isEqualTo(4);
+
+        NutritionValuesModel totalNutrition = nutrition.getTotalNutrition();
+        assertThat(totalNutrition).isNotNull();
+        assertThat(totalNutrition.getCalories()).isNotNull();
+        assertThat(totalNutrition.getProtein()).isNotNull();
+        assertThat(totalNutrition.getFat()).isNotNull();
+        assertThat(totalNutrition.getCarbs()).isNotNull();
+        assertThat(totalNutrition.getFiber()).isNotNull();
+        assertThat(totalNutrition.getTotalSugar()).isNotNull();
+        assertThat(totalNutrition.getSatFat()).isNotNull();
+        assertThat(totalNutrition.getCholesterol()).isNotNull();
+        assertThat(totalNutrition.getSodium()).isNotNull();
+
+        NutritionValuesModel perServingNutrition = nutrition.getPerServingNutrition();
+        assertThat(perServingNutrition).isNotNull();
+        assertThat(perServingNutrition.getCalories()).isNotNull();
+        assertThat(perServingNutrition.getProtein()).isNotNull();
+        assertThat(perServingNutrition.getFat()).isNotNull();
+        assertThat(perServingNutrition.getCarbs()).isNotNull();
+        assertThat(perServingNutrition.getFiber()).isNotNull();
+        assertThat(perServingNutrition.getTotalSugar()).isNotNull();
+        assertThat(perServingNutrition.getSatFat()).isNotNull();
+        assertThat(perServingNutrition.getCholesterol()).isNotNull();
+        assertThat(perServingNutrition.getSodium()).isNotNull();
+
+        assertThat(perServingNutrition.getCalories()).isEqualTo(totalNutrition.getCalories() / nutrition.getServings());
+        assertThat(perServingNutrition.getProtein()).isEqualTo(totalNutrition.getProtein() / nutrition.getServings());
+        assertThat(perServingNutrition.getFat()).isEqualTo(totalNutrition.getFat() / nutrition.getServings());
+        assertThat(perServingNutrition.getCarbs()).isEqualTo(totalNutrition.getCarbs() / nutrition.getServings());
     }
 
 
     private List<IngredientSelectionModel> createSelections(Map<Integer, List<PortionModel>> portions,
                                                             Map<String, Integer> ingredientToIdMap) {
-        logger.info("portions Map<String, List<PortionModel>> is {}", portions);
-
         Pattern WEIGHT_PATTERN =
                 Pattern.compile("(g|gram|grams|oz|ounce|ounces|lb|lbs|pound|pounds|kg|kilogram|kilograms)");
 
