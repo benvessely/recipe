@@ -25,7 +25,7 @@ public class PortionService {
         @Override
         public PortionModel mapRow(ResultSet rs, int rowNum) throws SQLException {
             PortionModel portion = new PortionModel();
-            portion.setId(rs.getInt("id"));
+            portion.setPortionId(rs.getInt("portion_id"));
             portion.setFdcId(rs.getInt("fdc_id"));
             portion.setUnitAmount(rs.getDouble("amount"));
             portion.setUnit(rs.getString("modifier"));

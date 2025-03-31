@@ -12,7 +12,7 @@ public class PortionModel {
         return portionId;
     }
 
-    public void setId(Integer portionId) {
+    public void setPortionId(Integer portionId) {
         this.portionId = portionId;
     }
 
