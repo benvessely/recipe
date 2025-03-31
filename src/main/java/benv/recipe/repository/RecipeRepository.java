@@ -125,4 +125,13 @@ public class RecipeRepository {
 
         return getRecipeById(id);
     }
+
+    public void deleteRecipe(Integer id) {
+        String sql = "DELETE FROM recipes WHERE id = ?";
+        int rowsAffected = jdbcTemplate.update(sql, id);
+
+        if (rowsAffected == 0) {
+            throw new RuntimeException("Recipe not found");
+        }
+    }
 }

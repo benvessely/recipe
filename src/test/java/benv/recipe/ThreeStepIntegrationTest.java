@@ -4,6 +4,7 @@ import benv.recipe.model.*;
 import benv.recipe.repository.RecipeRepository;
 import benv.recipe.service.IngredientMatchService;
 import benv.recipe.service.IngredientParserService;
+import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,10 +45,20 @@ public class ThreeStepIntegrationTest {
     void setUp() {
         testRecipe = new RecipeModel();
         testRecipe.setTitle("Test Recipe");
-        testRecipe.setIngredients("2 lb beef chuck roast\n1 cup red wine\n4 carrots");
+        testRecipe.setIngredients("0.5lb Black beans\n1 cup Worcesterhsire sauce\n1 g garlic");
         testRecipe.setInstructions("Cook food");
         RecipeModel createdRecipe = recipeRepository.createRecipe(testRecipe);
         recipeId = createdRecipe.getId();
+    }
+
+    @AfterEach
+    void tearDown() {
+        try {
+            logger.info("Removing test recipe from database");
+            recipeRepository.deleteRecipe(recipeId);
+        } catch (Exception e) {
+            logger.warn("Error cleaning up test data: {}", e.getMessage());
+        }
     }
 
     @Test
