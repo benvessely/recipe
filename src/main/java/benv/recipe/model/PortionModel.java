@@ -47,4 +47,15 @@ public class PortionModel {
     public void setWeightPer100g(Double weightPer100g) {
         this.weightPer100g = weightPer100g;
     }
+
+    @Override
+    public String toString() {
+        return "PortionModel{" +
+                "portionId=" + portionId +
+                ", fdcId=" + fdcId +
+                ", unitAmount=" + unitAmount +
+                ", unit='" + unit + '\'' +
+                ", weightPer100g=" + weightPer100g +
+                '}';
+    }
 }
