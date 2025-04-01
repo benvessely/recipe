@@ -15,7 +15,7 @@ import static java.lang.Math.max;
 
 @Service
 public class IngredientMatchService {
-    int MATCH_COUNT = 20;
+    int MATCH_COUNT = 15;
     double STANDARD_WEIGHT = 1.0;
     double QUALIFIER_WEIGHT = 0.5;
     double COMMON_WORD_WEIGHT = 0.2;
