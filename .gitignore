@@ -34,9 +34,6 @@ build/
 
 ### Random ###
 .idea/
-.mvn/
-mvnw
-mvnw.cmd
 
 ### Additional I added ###
 src/main/resources/application.properties
