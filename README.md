@@ -12,45 +12,101 @@ These portion options are then returned to the user, who chooses the most releva
 
 ## Installation
 
-The first step is to clone the project onto the user's machine, which can be done by running 
-```commandline
-git clone https://github.com/benvessely/recipe.git
-```
-in the terminal/command line.
 
 ### Prerequisites
+These requirements must be downloaded locally on your machine for the application to work. 
 - Java 17 or higher
 - PostgreSQL 12 or higher
-- Maven 3.6 or higher
+I will include steps below on how specifically to do this for each operating system below.
 
-### Database Setup
-1. Install PostgreSQL:
-    - **macOS**: Install via
-      ```bash 
-      brew install postgresql
-      brew services start postgresql
-      ```
-      or download from [postgresql.org](https://www.postgresql.org/download/macosx/)
-    - **Windows**: Download the installer from [postgresql.org](https://www.postgresql.org/download/windows/) 
-    - **Linux**: Use your package manager, e.g., `sudo apt install postgresql`
+### Setup instructions
+The first step is to clone the project onto your machine, which can be done by running
+```bash
+git clone https://github.com/benvessely/recipe.git
+```
+in the terminal/command line from the root directory of your filesystem (or any other desired location). 
 
-2. Create a database. The first line uses the Postgres interactive terminal interface `psql` to create a new user named `postgres`, the second line creates the actual database, and the third line quits `psql`, 
-    ```bash
-    psql -U postgres
-    CREATE DATABASE recipe_app
-    \q
-    ```
-Note that the schema.sql file will be run automatically when the application is run due to the `@EventListener(ApplicationReadyEvent.class)` in the DataLoaderService file, which will create the necessary tables for the application. 
+From here, the instructions vary based on operating system. 
 
-3. Configure Database Connection
+#### Mac
+1. If you don't already have Java and Postgres downloaded, then from the command line run
+```bash
+brew install openjdk@17
+brew install postgresql@14
+```
+2. Start the Postgres service:
+```bash 
+brew services start postgresql@14
+```
+3. Create the database:
+```bash
+psql postgres -c "CREATE DATABASE recipe_app;"
+```
+4. Create new user `recipe_user` with a password:  
+```bash
+psql postgres -c "CREATE USER recipe_user WITH PASSWORD <your_secure_password>;"
+```
+replacing <your_secure_password> with a password of your choice. 
+5. Grant the new user the required privileges:
+```bash 
+psql postgres -c "GRANT ALL PRIVILEGES ON DATABASE recipe_app TO recipe_user;"
+```
 
-Create or modify `src/main/resources/application.properties` with the following settings:
+
+
+
+
+#### Linux
+
+1. If you don't already have Java and Postgres downloaded, then from the command line run 
+```bash
+apt-get update
+apt-get install -y openjdk-17-jdk postgresql postgresql-contrib 
+```
+2. Get the Postgres service started using the command line:
+```bash
+service postgresql start
+```
+3. Create a database named `recipe_app` using the Postgres interactive terminal `psql` and the default user `postgres`.  
+```bash
+sudo -u postgres psql -c "CREATE DATABASE recipe_app;"
+```
+Note that the schema.sql file will be run automatically to create the necessary tables when the application is run due to the `@EventListener(ApplicationReadyEvent.class)` in the DataLoaderService file. 
+4. Set a password using 
+```bash
+sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD <your_postgres_password>;"
+```
+replacing `<your_postgres_password>` with a chosen password. 
+5. Create or modify `src/main/resources/application.properties` with the following settings:
 ```properties
 spring.datasource.url=jdbc:postgresql://localhost:5432/recipe_app
 spring.datasource.username=postgres
-spring.datasource.password=your_postgres_password
+spring.datasource.password=<your_postgres_password>
 ```
-replacing your_postgres_password with the password you set for the postgres user (if you set one). 
+replacing `<your_postgres_password>` with the password you chose in the last step. 
 
 
 
+
+## Running the application
+
+The application can be run via the command line command `./mvnw spring-boot:run`from the project root. This gets the API running, for which the usage details are included later in this document. 
+
+The tests can be run via `./mvnw test`, again from the project root. 
+
+
+## Testing of Installation
+
+Here is some documentation about how I tested the above installation methods using Docker to simulate different operating systems.
+
+#### Linux
+
+The Dockerfile and shell testing script `setup-and-test.sh` that I used to simulate the steps in the Installation section are within the `/InstallTesting/Linux` subdirectory of the project root directory. I copied the relevant food data CSV files into a subdirectory of `/InstallationTesting/Linux` so that the files would be available in the build context when we run the build command below. The Dockerfile, and thereby the test script, can be used to build an image using
+```bash
+docker build -t recipe-linux-test .
+```
+and then the container can be run using
+```bash
+docker run -it recipe-linux-test
+```
+After executing these commands, which follow my installation steps above and then run my unit and integration tests within the container, I can conclude that the installation is sound.  
