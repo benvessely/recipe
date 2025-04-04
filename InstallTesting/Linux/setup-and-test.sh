@@ -17,11 +17,9 @@ echo "spring.datasource.url=jdbc:postgresql://localhost:5432/recipe_app
 spring.datasource.username=postgres
 spring.datasource.password=postgres" > src/main/resources/application.properties
 
-# Build project
-chmod +x ./mvnw
-# ./mvnw clean install
 
 # Run tests
+chmod +x ./mvnw
 ./mvnw test
 
 echo "Installation test completed successfully!"
