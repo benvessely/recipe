@@ -47,10 +47,7 @@ psql postgres -c "CREATE DATABASE recipe_app;"
 psql postgres -c "CREATE USER recipe_user WITH PASSWORD <your_secure_password>;"
 ```
 replacing <your_secure_password> with a password of your choice. 
-5. Grant the new user the required privileges:
-```bash 
-psql postgres -c "GRANT ALL PRIVILEGES ON DATABASE recipe_app TO recipe_user;"
-```
+
 
 
 
