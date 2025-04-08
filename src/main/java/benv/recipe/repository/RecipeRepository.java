@@ -1,7 +1,10 @@
 package benv.recipe.repository;
 
 import benv.recipe.model.RecipeModel;
+import benv.recipe.service.DataLoaderService;
 import io.micrometer.common.lang.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -17,6 +20,7 @@ import java.util.Map;
 
 @Repository
 public class RecipeRepository {
+    private static final Logger logger = LoggerFactory.getLogger(RecipeRepository.class);
     private final JdbcTemplate jdbcTemplate;
 
     private static class RecipeRowMapper implements RowMapper<RecipeModel> {
@@ -54,6 +58,8 @@ public class RecipeRepository {
             VALUES (?, ?, ?, ?, ?, ?, ?)
             RETURNING id
             """;
+
+        logger.info("In createRecipe, RecipeModel recipe is {}", recipe.toString());
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
