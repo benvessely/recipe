@@ -5,7 +5,7 @@ public class PortionModel {
     private Integer fdcId;
     private Double unitAmount;
     private String unit;
-    private Double weightPer100g;
+    private Double weightGrams;
 
     // Getters and setters
     public Integer getPortionId() {
@@ -40,12 +40,12 @@ public class PortionModel {
         this.unit = unit;
     }
 
-    public Double getWeightPer100g() {
-        return weightPer100g;
+    public Double getWeightGrams() {
+        return weightGrams;
     }
 
-    public void setWeightPer100g(Double weightPer100g) {
-        this.weightPer100g = weightPer100g;
+    public void setWeightGrams(Double weightGrams) {
+        this.weightGrams = weightGrams;
     }
 
     @Override
@@ -55,7 +55,7 @@ public class PortionModel {
                 ", fdcId=" + fdcId +
                 ", unitAmount=" + unitAmount +
                 ", unit='" + unit + '\'' +
-                ", weightPer100g=" + weightPer100g +
+                ", weightGrams=" + weightGrams +
                 '}';
     }
 }

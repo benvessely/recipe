@@ -29,7 +29,7 @@ public class PortionService {
             portion.setFdcId(rs.getInt("fdc_id"));
             portion.setUnitAmount(rs.getDouble("amount"));
             portion.setUnit(rs.getString("modifier"));
-            portion.setWeightPer100g(rs.getDouble("weight"));
+            portion.setWeightGrams(rs.getDouble("weight"));
             return portion;
         }
     }
