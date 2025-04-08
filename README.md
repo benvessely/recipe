@@ -14,7 +14,7 @@ git clone https://github.com/benvessely/recipe.git
 ```
 in the command line from the root directory of your filesystem (or any other desired location). This should create a copy of the repository called `recipe` containing the repository from git. 
 
-Then, there are some CSV files that are required by the function. They are too big to store using git, but they can be downloaded by visiting  [this link](https://fdc.nal.usda.gov/download-datasets), scrolling down to the Latest Downloads section, then in the row for the "SR Legacy" Data Type, click to download the file that says "April 2018 (CSV)". This should download the data needed for the project, which should not change, as this database is no longer updated as of 2018. Once you have the data downloaded, unzip it, rename the unzipped folder `nutrition_data`, and move this folder to the `src/main/resources/` directory within your `recipe` project. 
+There are some CSV files that are required for the calculation steps to work. They are too big to store using git, but they should be downloaded by visiting  [this link](https://fdc.nal.usda.gov/download-datasets), scrolling down to the Latest Downloads section, then in the row for the "SR Legacy" Data Type, clicking to download the file that says "April 2018 (CSV)". This should download the data needed for the project. Once you have the data downloaded, unzip it, rename the unzipped folder `nutrition_data`, and move this folder to the `src/main/resources/` directory within your `recipe` project. 
 
 One important thing to note is that this data is still relevant, even if it hasn't been updated in some years, as the nutrition information for basic ingredients, like the ingredients in this database, have also not changed. 
 
@@ -128,9 +128,9 @@ After executing these commands, which follow my installation steps above for set
 
 
 ## API Usage
-Spring Boot applications run, by default, on `localhost:8080`, though this can be changed by setting `server.port=x` in the application.properties file to use port `x`. It will henceforth be assumed that all API URLs should be prefaced with `localhost:8080` to be accessed successfully. 
+Spring Boot applications run, by default, on `localhost:8080`, though this can be changed by setting `server.port=x` in the application.properties file to use port `x`. It will henceforth be assumed that all API URLs should be prefaced with `localhost:8080`. 
 
-Another relevant note is that I will be referencing the API from the perspective of a user, which means that the request and response bodies will be pure JSON. But, as soon as the request is sent to the server, Java deserializes the JSON into some sort of Java object, and, likewise, once the necessary steps have been carried out on the server side, the data that needs to be returned to the client is serialized back into JSON. I sometimes reference the form of the data when it is in deserialized form on the server side, and other to this data in JSON form, as it's seen by the user---I will do my best to clarify the perspective with which I am referencing the data at any time. 
+Another relevant note is that I will be referencing the API from the perspective of a user, which means that the request and response bodies will be pure JSON. But, as soon as the request is sent to the server, Java deserializes the JSON into some sort of Java object, and, likewise, once the necessary steps have been carried out on the server side, the data that needs to be returned to the client is serialized back into JSON. I sometimes reference the form of the data when it is in deserialized form on the server side, and other times refer to this data in JSON form, as it's seen by the user---I will do my best to clarify the perspective with which I am referencing the data at any time. 
 
 ### Basic Endpoints
 
@@ -269,7 +269,7 @@ Example:
 }
 ```
 
-Response Body: The updated recipe is immediately queried and returned in the response body. 
+Response Body: The updated recipe is immediately queried from the database and returned in the response body. 
 
 Example Response: 
 ```json 
@@ -290,7 +290,7 @@ Example Response:
 ### Nutrition Calculation Endpoints
 
 #### Fetch Matches From Database
-Given a recipe in the recipe table that's identified by its id, this endpoint fetches the 15 closest matches from the ingredients table for each ingredient in the recipe. This is the first step in calculating the nutrition information of a recipe---choosing ingredients from the database so that we can use the database's nutrition information for calculations regarding those ingredients. 
+Given a recipe in the recipe table that's identified by its id, this endpoint fetches the 15 closest matches from the ingredients table for each ingredient in the recipe. This is the first step in calculating the nutrition information of a recipe: choosing ingredients from the database so that we can use the database's nutrition information for calculations regarding those ingredients. 
 
 URL: `/api/recipes/{id}/ingredient-matches`, where `id` is an integer corresponding to one of the recipe ids in the database.
 
